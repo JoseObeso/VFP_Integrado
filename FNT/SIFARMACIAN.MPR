@@ -1,6 +1,6 @@
 *       *********************************************************
 *       *                                                         
-*       * 07/19/22           SIFARMACIAN.MPR            10:30:00  
+*       * 07/29/22           SIFARMACIAN.MPR            20:05:43  
 *       *                                                         
 *       *********************************************************
 *       *                                                         
@@ -26,13 +26,13 @@
 SET SYSMENU TO
 SET SYSMENU AUTOMATIC
 
-DEFINE PAD _6du0mi74q OF _MSYSMENU PROMPT "FARMACIA" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172kat OF _MSYSMENU PROMPT "FARMACIA" COLOR SCHEME 3 ;
 	KEY ALT+F, ""
-DEFINE PAD _6du0mi74r OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172kau OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
 	KEY ALT+S, ""
-ON PAD _6du0mi74q OF _MSYSMENU ACTIVATE POPUP farmacia
-ON SELECTION PAD _6du0mi74r OF _MSYSMENU ;
-	DO _6du0mi74s ;
+ON PAD _6e4172kat OF _MSYSMENU ACTIVATE POPUP farmacia
+ON SELECTION PAD _6e4172kau OF _MSYSMENU ;
+	DO _6e4172kav ;
 	IN LOCFILE("FNT\SIFARMACIAN" ,"MPX;MPR|FXP;PRG" ,"WHERE is SIFARMACIAN?")
 
 DEFINE POPUP farmacia MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -44,13 +44,13 @@ DEFINE BAR 4 OF farmacia PROMPT "SALIR" ;
 	PICTURE "..\gra\salir.gif"
 ON SELECTION BAR 2 OF farmacia do form frmstockfarmacia.scx
 ON SELECTION BAR 4 OF farmacia ;
-	DO _6du0mi74t ;
+	DO _6e4172kaw ;
 	IN LOCFILE("FNT\SIFARMACIAN" ,"MPX;MPR|FXP;PRG" ,"WHERE is SIFARMACIAN?")
 
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI74S  ON SELECTION PAD                            
+*       * _6E4172KAV  ON SELECTION PAD                            
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -61,7 +61,7 @@ ON SELECTION BAR 4 OF farmacia ;
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi74s
+PROCEDURE _6e4172kav
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
@@ -78,7 +78,7 @@ ENDIF
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI74T  ON SELECTION BAR 4 OF POPUP farmacia        
+*       * _6E4172KAW  ON SELECTION BAR 4 OF POPUP farmacia        
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -89,7 +89,7 @@ ENDIF
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi74t
+PROCEDURE _6e4172kaw
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1

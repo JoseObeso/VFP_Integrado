@@ -1,6 +1,6 @@
 *       *********************************************************
 *       *                                                         
-*       * 07/19/22            SBUSQUEDA.MPR             10:30:01  
+*       * 07/29/22            SBUSQUEDA.MPR             20:05:43  
 *       *                                                         
 *       *********************************************************
 *       *                                                         
@@ -26,13 +26,13 @@
 SET SYSMENU TO
 SET SYSMENU AUTOMATIC
 
-DEFINE PAD _6du0mi7yu OF _MSYSMENU PROMPT "CONSULTAS INTEGRADA" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172kv7 OF _MSYSMENU PROMPT "CONSULTAS INTEGRADA" COLOR SCHEME 3 ;
 	KEY ALT+C, ""
-DEFINE PAD _6du0mi7yv OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172kv8 OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
 	KEY ALT+S, ""
-ON PAD _6du0mi7yu OF _MSYSMENU ACTIVATE POPUP consultasi
-ON SELECTION PAD _6du0mi7yv OF _MSYSMENU ;
-	DO _6du0mi7yw ;
+ON PAD _6e4172kv7 OF _MSYSMENU ACTIVATE POPUP consultasi
+ON SELECTION PAD _6e4172kv8 OF _MSYSMENU ;
+	DO _6e4172kv9 ;
 	IN LOCFILE("FNT\SBUSQUEDA" ,"MPX;MPR|FXP;PRG" ,"WHERE is SBUSQUEDA?")
 
 DEFINE POPUP consultasi MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -43,13 +43,13 @@ DEFINE BAR 3 OF consultasi PROMPT "SALIR" ;
 	PICTURE "..\gra\salir.gif"
 ON SELECTION BAR 1 OF consultasi do form frm_gestion_pacientes_buscar_bd.scx
 ON SELECTION BAR 3 OF consultasi ;
-	DO _6du0mi7yx ;
+	DO _6e4172kva ;
 	IN LOCFILE("FNT\SBUSQUEDA" ,"MPX;MPR|FXP;PRG" ,"WHERE is SBUSQUEDA?")
 
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI7YW  ON SELECTION PAD                            
+*       * _6E4172KV9  ON SELECTION PAD                            
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -60,7 +60,7 @@ ON SELECTION BAR 3 OF consultasi ;
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi7yw
+PROCEDURE _6e4172kv9
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
@@ -76,7 +76,7 @@ ENDIF
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI7YX  ON SELECTION BAR 3 OF POPUP consultasi      
+*       * _6E4172KVA  ON SELECTION BAR 3 OF POPUP consultasi      
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -87,7 +87,7 @@ ENDIF
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi7yx
+PROCEDURE _6e4172kva
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1

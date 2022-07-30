@@ -1,6 +1,6 @@
 *       *********************************************************
 *       *                                                         
-*       * 07/19/22           SINTEGRADAS.MPR            10:29:57  
+*       * 07/29/22           SINTEGRADAS.MPR            20:05:41  
 *       *                                                         
 *       *********************************************************
 *       *                                                         
@@ -26,43 +26,43 @@
 SET SYSMENU TO
 SET SYSMENU AUTOMATIC
 
-DEFINE PAD _6du0mi4t7 OF _MSYSMENU PROMPT "GESTION DE PACIENTES" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2e OF _MSYSMENU PROMPT "GESTION DE PACIENTES" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4t8 OF _MSYSMENU PROMPT "GESTION DE ARCHIVOS" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2f OF _MSYSMENU PROMPT "GESTION DE ARCHIVOS" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4t9 OF _MSYSMENU PROMPT "GESTION DE ESTADISTICAS" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2g OF _MSYSMENU PROMPT "GESTION DE ESTADISTICAS" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4ta OF _MSYSMENU PROMPT "GESTION DE CITAS" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2h OF _MSYSMENU PROMPT "GESTION DE CITAS" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4tb OF _MSYSMENU PROMPT "GESTION DE CAJA" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2i OF _MSYSMENU PROMPT "GESTION DE CAJA" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4tc OF _MSYSMENU PROMPT "GESTION DE SEGUROS" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2j OF _MSYSMENU PROMPT "GESTION DE SEGUROS" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4td OF _MSYSMENU PROMPT "GESTION DE EMERGENCIA" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2k OF _MSYSMENU PROMPT "GESTION DE EMERGENCIA" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4te OF _MSYSMENU PROMPT "GESTION DE FARMACIA" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2l OF _MSYSMENU PROMPT "GESTION DE FARMACIA" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4tf OF _MSYSMENU PROMPT "GESTION DE LIQUIDACIONES" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2m OF _MSYSMENU PROMPT "GESTION DE LIQUIDACIONES" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4tg OF _MSYSMENU PROMPT "GESTION DE PERSONAL" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2n OF _MSYSMENU PROMPT "GESTION DE PERSONAL" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4th OF _MSYSMENU PROMPT "GESTION DE USUARIOS" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2o OF _MSYSMENU PROMPT "GESTION DE USUARIOS" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6du0mi4ti OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172j2p OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
 	KEY ALT+S, ""
-ON PAD _6du0mi4t7 OF _MSYSMENU ACTIVATE POPUP gestiondep
-ON PAD _6du0mi4t8 OF _MSYSMENU ACTIVATE POPUP gestiondea
-ON PAD _6du0mi4t9 OF _MSYSMENU ACTIVATE POPUP _4uf0z0bwa
-ON PAD _6du0mi4ta OF _MSYSMENU ACTIVATE POPUP gestiondec
-ON PAD _6du0mi4tb OF _MSYSMENU ACTIVATE POPUP _4pw0j187u
-ON PAD _6du0mi4tc OF _MSYSMENU ACTIVATE POPUP gestiondes
-ON PAD _6du0mi4td OF _MSYSMENU ACTIVATE POPUP gestiondee
-ON PAD _6du0mi4te OF _MSYSMENU ACTIVATE POPUP gestiondef
-ON PAD _6du0mi4tf OF _MSYSMENU ACTIVATE POPUP gestiondel
-ON PAD _6du0mi4tg OF _MSYSMENU ACTIVATE POPUP _4vi0s279c
-ON PAD _6du0mi4th OF _MSYSMENU ACTIVATE POPUP gestiondeu
-ON SELECTION PAD _6du0mi4ti OF _MSYSMENU ;
-	DO _6du0mi4tj ;
+ON PAD _6e4172j2e OF _MSYSMENU ACTIVATE POPUP gestiondep
+ON PAD _6e4172j2f OF _MSYSMENU ACTIVATE POPUP gestiondea
+ON PAD _6e4172j2g OF _MSYSMENU ACTIVATE POPUP _4uf0z0bwa
+ON PAD _6e4172j2h OF _MSYSMENU ACTIVATE POPUP gestiondec
+ON PAD _6e4172j2i OF _MSYSMENU ACTIVATE POPUP _4pw0j187u
+ON PAD _6e4172j2j OF _MSYSMENU ACTIVATE POPUP gestiondes
+ON PAD _6e4172j2k OF _MSYSMENU ACTIVATE POPUP gestiondee
+ON PAD _6e4172j2l OF _MSYSMENU ACTIVATE POPUP gestiondef
+ON PAD _6e4172j2m OF _MSYSMENU ACTIVATE POPUP gestiondel
+ON PAD _6e4172j2n OF _MSYSMENU ACTIVATE POPUP _4vi0s279c
+ON PAD _6e4172j2o OF _MSYSMENU ACTIVATE POPUP gestiondeu
+ON SELECTION PAD _6e4172j2p OF _MSYSMENU ;
+	DO _6e4172j2q ;
 	IN LOCFILE("FNT\SINTEGRADAS" ,"MPX;MPR|FXP;PRG" ,"WHERE is SINTEGRADAS?")
 
 DEFINE POPUP gestiondep MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -77,7 +77,7 @@ DEFINE BAR 5 OF gestiondep PROMPT "SALIR" ;
 ON SELECTION BAR 1 OF gestiondep do form frm_gestion_pacientes_buscar_bd.scx
 ON SELECTION BAR 3 OF gestiondep do form frm_gestion_pacientes_ubicacion_generacion_hc.scx
 ON SELECTION BAR 5 OF gestiondep ;
-	DO _6du0mi4tk ;
+	DO _6e4172j2r ;
 	IN LOCFILE("FNT\SINTEGRADAS" ,"MPX;MPR|FXP;PRG" ,"WHERE is SINTEGRADAS?")
 
 DEFINE POPUP gestiondea MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -96,7 +96,7 @@ ON SELECTION BAR 1 OF gestiondea do form frmhistorias.scx
 ON SELECTION BAR 3 OF gestiondea do form frmhistorias_adelantadas.scx
 ON SELECTION BAR 5 OF gestiondea do form frmhcsinmov.scx
 ON SELECTION BAR 7 OF gestiondea ;
-	DO _6du0mi4tl ;
+	DO _6e4172j2s ;
 	IN LOCFILE("FNT\SINTEGRADAS" ,"MPX;MPR|FXP;PRG" ,"WHERE is SINTEGRADAS?")
 
 DEFINE POPUP _4uf0z0bwa MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -336,7 +336,7 @@ ON SELECTION BAR 3 OF gestiondeu do form frmveruser_bdpersonal.scx
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI4TJ  ON SELECTION PAD                            
+*       * _6E4172J2Q  ON SELECTION PAD                            
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -347,7 +347,7 @@ ON SELECTION BAR 3 OF gestiondeu do form frmveruser_bdpersonal.scx
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi4tj
+PROCEDURE _6e4172j2q
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
@@ -363,7 +363,7 @@ ENDIF
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI4TK  ON SELECTION BAR 5 OF POPUP gestiondep      
+*       * _6E4172J2R  ON SELECTION BAR 5 OF POPUP gestiondep      
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -374,7 +374,7 @@ ENDIF
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi4tk
+PROCEDURE _6e4172j2r
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
@@ -390,7 +390,7 @@ ENDIF
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI4TL  ON SELECTION BAR 7 OF POPUP gestiondea      
+*       * _6E4172J2S  ON SELECTION BAR 7 OF POPUP gestiondea      
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -401,7 +401,7 @@ ENDIF
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi4tl
+PROCEDURE _6e4172j2s
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1

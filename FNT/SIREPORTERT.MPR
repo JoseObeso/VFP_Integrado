@@ -1,6 +1,6 @@
 *       *********************************************************
 *       *                                                         
-*       * 07/19/22           SIREPORTERT.MPR            10:30:02  
+*       * 07/29/22           SIREPORTERT.MPR            20:05:44  
 *       *                                                         
 *       *********************************************************
 *       *                                                         
@@ -26,13 +26,13 @@
 SET SYSMENU TO
 SET SYSMENU AUTOMATIC
 
-DEFINE PAD _6du0mi885 OF _MSYSMENU PROMPT "REPORTES" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172l0k OF _MSYSMENU PROMPT "REPORTES" COLOR SCHEME 3 ;
 	KEY ALT+R, ""
-DEFINE PAD _6du0mi886 OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172l0l OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
 	KEY ALT+S, ""
-ON PAD _6du0mi885 OF _MSYSMENU ACTIVATE POPUP reportes
-ON SELECTION PAD _6du0mi886 OF _MSYSMENU ;
-	DO _6du0mi887 ;
+ON PAD _6e4172l0k OF _MSYSMENU ACTIVATE POPUP reportes
+ON SELECTION PAD _6e4172l0l OF _MSYSMENU ;
+	DO _6e4172l0m ;
 	IN LOCFILE("FNT\SIREPORTERT" ,"MPX;MPR|FXP;PRG" ,"WHERE is SIREPORTERT?")
 
 DEFINE POPUP reportes MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -47,13 +47,13 @@ DEFINE BAR 5 OF reportes PROMPT "SALIR" ;
 ON SELECTION BAR 1 OF reportes do form frm_estadistica_ver_actividades.scx
 ON SELECTION BAR 3 OF reportes do form frm_estadistica_actividad_modelo_operacional.scx
 ON SELECTION BAR 5 OF reportes ;
-	DO _6du0mi888 ;
+	DO _6e4172l0n ;
 	IN LOCFILE("FNT\SIREPORTERT" ,"MPX;MPR|FXP;PRG" ,"WHERE is SIREPORTERT?")
 
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI887  ON SELECTION PAD                            
+*       * _6E4172L0M  ON SELECTION PAD                            
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -64,7 +64,7 @@ ON SELECTION BAR 5 OF reportes ;
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi887
+PROCEDURE _6e4172l0m
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
@@ -80,7 +80,7 @@ ENDIF
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI888  ON SELECTION BAR 5 OF POPUP reportes        
+*       * _6E4172L0N  ON SELECTION BAR 5 OF POPUP reportes        
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -91,7 +91,7 @@ ENDIF
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi888
+PROCEDURE _6e4172l0n
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1

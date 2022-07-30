@@ -1,6 +1,6 @@
 *       *********************************************************
 *       *                                                         
-*       * 07/19/22           SILIQUIMENU.MPR            10:30:00  
+*       * 07/29/22           SILIQUIMENU.MPR            20:05:43  
 *       *                                                         
 *       *********************************************************
 *       *                                                         
@@ -26,13 +26,13 @@
 SET SYSMENU TO
 SET SYSMENU AUTOMATIC
 
-DEFINE PAD _6du0mi77q OF _MSYSMENU PROMPT "OPERACIONES" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172kci OF _MSYSMENU PROMPT "OPERACIONES" COLOR SCHEME 3 ;
 	KEY ALT+O, ""
-DEFINE PAD _6du0mi77r OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
+DEFINE PAD _6e4172kcj OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
 	KEY ALT+S, ""
-ON PAD _6du0mi77q OF _MSYSMENU ACTIVATE POPUP operacione
-ON SELECTION PAD _6du0mi77r OF _MSYSMENU ;
-	DO _6du0mi77s ;
+ON PAD _6e4172kci OF _MSYSMENU ACTIVATE POPUP operacione
+ON SELECTION PAD _6e4172kcj OF _MSYSMENU ;
+	DO _6e4172kck ;
 	IN LOCFILE("FNT\SILIQUIMENU" ,"MPX;MPR|FXP;PRG" ,"WHERE is SILIQUIMENU?")
 
 DEFINE POPUP operacione MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -59,13 +59,13 @@ ON SELECTION BAR 5 OF operacione do form frmrevisarliquidaciones.scx
 ON SELECTION BAR 7 OF operacione do form frmimprimirfuasrango.scx
 ON SELECTION BAR 9 OF operacione do form frmbuscarpacientes.scx
 ON SELECTION BAR 11 OF operacione ;
-	DO _6du0mi77t ;
+	DO _6e4172kcl ;
 	IN LOCFILE("FNT\SILIQUIMENU" ,"MPX;MPR|FXP;PRG" ,"WHERE is SILIQUIMENU?")
 
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI77S  ON SELECTION PAD                            
+*       * _6E4172KCK  ON SELECTION PAD                            
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -76,7 +76,7 @@ ON SELECTION BAR 11 OF operacione ;
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi77s
+PROCEDURE _6e4172kck
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
@@ -93,7 +93,7 @@ ENDIF
 
 *       *********************************************************
 *       *                                                         
-*       * _6DU0MI77T  ON SELECTION BAR 11 OF POPUP operacione     
+*       * _6E4172KCL  ON SELECTION BAR 11 OF POPUP operacione     
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -104,7 +104,7 @@ ENDIF
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6du0mi77t
+PROCEDURE _6e4172kcl
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
