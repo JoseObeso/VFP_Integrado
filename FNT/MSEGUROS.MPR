@@ -1,6 +1,6 @@
 *       *********************************************************
 *       *                                                         
-*       * 07/29/22            MSEGUROS.MPR              20:05:43  
+*       * 07/29/22            MSEGUROS.MPR              22:23:27  
 *       *                                                         
 *       *********************************************************
 *       *                                                         
@@ -26,13 +26,13 @@
 SET SYSMENU TO
 SET SYSMENU AUTOMATIC
 
-DEFINE PAD _6e4172kr0 OF _MSYSMENU PROMPT "OPERACIONES" COLOR SCHEME 3 ;
+DEFINE PAD _6e41bzp6x OF _MSYSMENU PROMPT "OPERACIONES" COLOR SCHEME 3 ;
 	KEY ALT+O, ""
-DEFINE PAD _6e4172kr1 OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
+DEFINE PAD _6e41bzp6y OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
 	KEY ALT+S, ""
-ON PAD _6e4172kr0 OF _MSYSMENU ACTIVATE POPUP newitem
-ON SELECTION PAD _6e4172kr1 OF _MSYSMENU ;
-	DO _6e4172kr2 ;
+ON PAD _6e41bzp6x OF _MSYSMENU ACTIVATE POPUP newitem
+ON SELECTION PAD _6e41bzp6y OF _MSYSMENU ;
+	DO _6e41bzp6z ;
 	IN LOCFILE("FNT\MSEGUROS" ,"MPX;MPR|FXP;PRG" ,"WHERE is MSEGUROS?")
 
 DEFINE POPUP newitem MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -63,13 +63,13 @@ ON SELECTION BAR 7 OF newitem do form frm_seguros_ver_estados_fuas.scx
 ON SELECTION BAR 9 OF newitem do form frm_gestion_pacientes_buscar_bd.scx
 ON SELECTION BAR 11 OF newitem do form frm_seguros_reimpresion_fuas.scx
 ON SELECTION BAR 13 OF newitem ;
-	DO _6e4172kr3 ;
+	DO _6e41bzp70 ;
 	IN LOCFILE("FNT\MSEGUROS" ,"MPX;MPR|FXP;PRG" ,"WHERE is MSEGUROS?")
 
 
 *       *********************************************************
 *       *                                                         
-*       * _6E4172KR2  ON SELECTION PAD                            
+*       * _6E41BZP6Z  ON SELECTION PAD                            
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -80,7 +80,7 @@ ON SELECTION BAR 13 OF newitem ;
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6e4172kr2
+PROCEDURE _6e41bzp6z
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
@@ -95,7 +95,7 @@ ENDIF
 
 *       *********************************************************
 *       *                                                         
-*       * _6E4172KR3  ON SELECTION BAR 13 OF POPUP newitem        
+*       * _6E41BZP70  ON SELECTION BAR 13 OF POPUP newitem        
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -106,7 +106,7 @@ ENDIF
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6e4172kr3
+PROCEDURE _6e41bzp70
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1

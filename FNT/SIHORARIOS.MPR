@@ -1,6 +1,6 @@
 *       *********************************************************
 *       *                                                         
-*       * 07/29/22           SIHORARIOS.MPR             20:05:42  
+*       * 07/29/22           SIHORARIOS.MPR             22:23:23  
 *       *                                                         
 *       *********************************************************
 *       *                                                         
@@ -26,13 +26,13 @@
 SET SYSMENU TO
 SET SYSMENU AUTOMATIC
 
-DEFINE PAD _6e4172jyh OF _MSYSMENU PROMPT "GESTION DE PERSONAL" COLOR SCHEME 3 ;
+DEFINE PAD _6e41bzmd7 OF _MSYSMENU PROMPT "GESTION DE PERSONAL" COLOR SCHEME 3 ;
 	KEY ALT+G, ""
-DEFINE PAD _6e4172jyi OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
+DEFINE PAD _6e41bzmd8 OF _MSYSMENU PROMPT "SALIR" COLOR SCHEME 3 ;
 	KEY ALT+S, ""
-ON PAD _6e4172jyh OF _MSYSMENU ACTIVATE POPUP _4vi0s279c
-ON SELECTION PAD _6e4172jyi OF _MSYSMENU ;
-	DO _6e4172jyj ;
+ON PAD _6e41bzmd7 OF _MSYSMENU ACTIVATE POPUP _4vi0s279c
+ON SELECTION PAD _6e41bzmd8 OF _MSYSMENU ;
+	DO _6e41bzmd9 ;
 	IN LOCFILE("FNT\SIHORARIOS" ,"MPX;MPR|FXP;PRG" ,"WHERE is SIHORARIOS?")
 
 DEFINE POPUP _4vi0s279c MARGIN RELATIVE SHADOW COLOR SCHEME 4
@@ -56,7 +56,7 @@ ON SELECTION BAR 7 OF _4vi0s279c do form frmvercitasmedicoshuelga.scx
 
 *       *********************************************************
 *       *                                                         
-*       * _6E4172JYJ  ON SELECTION PAD                            
+*       * _6E41BZMD9  ON SELECTION PAD                            
 *       *                                                         
 *       * Procedure Origin:                                       
 *       *                                                         
@@ -67,7 +67,7 @@ ON SELECTION BAR 7 OF _4vi0s279c do form frmvercitasmedicoshuelga.scx
 *       *                                                         
 *       *********************************************************
 *
-PROCEDURE _6e4172jyj
+PROCEDURE _6e41bzmd9
 PRIVATE i
 i = MESSAGEBOX('¿Desea salir?', 1 + 32, 'Atención')
 IF i = 1
