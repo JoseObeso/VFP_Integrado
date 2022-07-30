@@ -1,0 +1,2 @@
+lc = 'D:\' + lcnombre_archivo  TYPE XLS
+Error in line 30: Syntax error.

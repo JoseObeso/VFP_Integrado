@@ -1,0 +1,171 @@
+Archivo_ = FILE(".\bd.ini") 
+   IF Archivo_ = .T. 
+      N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+      x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+      x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+      lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" +  "SERVER=" + x_Server + ";" +  "UID=" + x_UID + ";" + "PWD=" + x_PWD + ";" + "DATABASE=" + x_DBaseName + ";"
+      Sqlsetprop(0,"DispLogin" , 3 ) 
+       * Asignacion de Variables con sus datos 
+      gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+      if !gconecta = 1 then
+      lcStringCnxLocal = "Driver={SQL Server Native Client 11.0};" +  "SERVER=" + x_Server + ";" +  "UID=" + x_UID + ";" + "PWD=" + x_PWD + ";" + "DATABASE=" + x_DBaseName + ";"
+      Sqlsetprop(0,"DispLogin" , 3 ) 
+       * Asignacion de Variables con sus datos 
+      gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+     
+      
+   ENDIF
+   
+ENDIF
+
+   
+clear
+
+TEXT TO lqry_obtener_fechas_validas noshow
+  truncate table [SIGSALUD].[dbo].[TM_RESUL_CAJA]
+  declare @lcfecha1 datetime = convert(datetime, '2021-07-01', 101)
+  declare @lcfecha2 datetime = convert(datetime, '2021-07-20', 101)
+  declare @lt_fecha_registro table (fecha_rango datetime);
+  insert  @lt_fecha_registro (fecha_rango)
+  select Fecha as fecha_rango from [SIGSALUD].[dbo].[PAGOC]   where FECHA between convert(datetime, @lcfecha1, 101)  and convert(datetime, @lcfecha2, 101) and estado = '2' 
+     group by FECHA order by fecha 
+  select fecha_rango from @lt_fecha_registro 
+ENDTEXT
+lejecuta=SQLEXEC(gconecta,lqry_obtener_fechas_validas,"tfr") 
+SELECT tfr
+lnfr = RECCOUNT()
+IF lnfr > 0
+  GO top
+  SCAN
+    ldfecha_seleccionar = substr(DTOC(tfr.fecha_rango),1,10)
+    
+    TEXT TO lobtener_datos noshow
+           declare @ldfecha datetime = CONVERT(DATETIME, ?ldfecha_seleccionar, 103)
+		  
+		  
+		
+    declare @lc_numero2_inicio varchar(11) = ( SELECT top 1 PAGOC.NUMERO from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+     ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+     ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+       WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '002'  ORDER BY PAGOC.NUMERO )
+
+    declare @lc_numero2_fin varchar(11) = ( SELECT top 1 PAGOC.NUMERO from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+      ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+        ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+           WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '002'  ORDER BY PAGOC.NUMERO desc )
+
+    declare @lc_numero2_monto numeric(8,3) = (SELECT sum(PAGOd.IMPORTE)  from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+       ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+         ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+          WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '002')
+
+
+
+    declare @lc_numero3_inicio varchar(11) = ( SELECT top 1 PAGOC.NUMERO from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+     ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+     ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+       WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '003'  ORDER BY PAGOC.NUMERO )
+
+    declare @lc_numero3_fin varchar(11) = ( SELECT top 1 PAGOC.NUMERO from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+      ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+        ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+           WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '003'  ORDER BY PAGOC.NUMERO desc )
+
+    declare @lc_numero3_monto numeric(8,3) = (SELECT sum(PAGOd.IMPORTE)  from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+       ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+         ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+          WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '003')
+          
+
+
+
+    declare @lc_numero4_inicio varchar(11) = ( SELECT top 1 PAGOC.NUMERO from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+     ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+     ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+       WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '004'  ORDER BY PAGOC.NUMERO )
+
+    declare @lc_numero4_fin varchar(11) = ( SELECT top 1 PAGOC.NUMERO from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+      ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+        ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+           WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '004'  ORDER BY PAGOC.NUMERO desc )
+
+    declare @lc_numero4_monto numeric(8,3) = (SELECT sum(PAGOd.IMPORTE)  from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+       ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+         ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+          WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '004')
+          
+
+    declare @lc_numero5_inicio varchar(11) = ( SELECT top 1 PAGOC.NUMERO from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+     ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+     ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+       WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '005'  ORDER BY PAGOC.NUMERO )
+
+    declare @lc_numero5_fin varchar(11) = ( SELECT top 1 PAGOC.NUMERO from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+      ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+        ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+           WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '005'  ORDER BY PAGOC.NUMERO desc )
+
+    declare @lc_numero5_monto numeric(8,3) = (SELECT sum(PAGOd.IMPORTE)  from [SIGSALUD].[dbo].[PAGOC] INNER JOIN [SIGSALUD].[dbo].[PAGOD] 
+       ON PagoC.Pagoid=PagoD.Pagoid INNER JOIN [SIGSALUD].[dbo].[ITEM] ON Item.Item=PagoD.Item INNER JOIN [SIGSALUD].[dbo].[Grupo_Recaudacion] 
+         ON Item.Grupo_Recaudacion=Grupo_Recaudacion.Grupo_Recaudacion
+          WHERE PagoC.Fecha between @ldfecha  and @ldfecha and pagoc.ESTADO>1 AND Item.Grupo_Recaudacion <> '17' and substring(pagoc.NUMERO,2,3) = '005')
+
+
+
+   
+     INSERT INTO [SIGSALUD].[dbo].[TM_RESUL_CAJA]([fecha],[desde],[hasta],[monto])
+   select convert(varchar(10), @ldfecha, 103)  fecha, @lc_numero1_inicio  desde, @lc_numero1_fin hasta, @lc_numero1_monto  monto
+     
+     
+     
+      union all
+     select convert(varchar(10), @ldfecha, 103) fecha, @lc_numero2_inicio desde,  @lc_numero2_fin hasta, @lc_numero2_monto
+      union all
+     select convert(varchar(10), @ldfecha, 103)  fecha, @lc_numero3_inicio  desde, @lc_numero3_fin hasta, @lc_numero3_monto
+      union all
+     select convert(varchar(10), @ldfecha, 103) fecha, @lc_numero4_inicio desde,  @lc_numero4_fin hasta, @lc_numero4_monto
+      union all
+     select convert(varchar(10), @ldfecha, 103) fecha, @lc_numero5_inicio desde,  @lc_numero5_fin hasta, @lc_numero5_monto
+     
+
+    ENDTEXT
+    lejecuta=SQLEXEC(gconecta,lobtener_datos) 
+    SELECT traer
+    
+  
+   
+   ENDSCAN
+   
+   
+   
+   
+*!*	  TEXT TO lqry_procesar_para_reporte noshow
+*!*	    update [SIGSALUD].[dbo].[TM_RESUL_CAJA] set desde = '' where desde is null
+*!*	    update [SIGSALUD].[dbo].[TM_RESUL_CAJA] set hasta = '' where hasta is null
+*!*	    update [SIGSALUD].[dbo].[TM_RESUL_CAJA] set monto = 0 where monto is null
+*!*	   
+*!*	    SELECT 'X' AS INDICADOR, [fecha],[desde],[hasta],[monto]  FROM [SIGSALUD].[dbo].[TM_RESUL_CAJA]
+*!*	  ENDTEXT
+*!*	  lejecuta=SQLEXEC(gconecta,lqry_procesar_para_reporte, "trpm") 
+*!*	  SELECT trpm
+*!*	  BROWSE
+*!*	  
+*!*	  DO FOXYPREVIEWER.APP
+*!*	  _Screen.oFoxyPreviewer.cLanguage = "SPANISH"
+*!*	  REPORT FORM rptremi.frx PREVIEW   
+*!*	   
+
+
+ELSE
+ cMensage = ' ... NO EXISTEN DATOS.....' 
+ _Screen.Scalemode = 0
+ Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+ENDIF
+
+

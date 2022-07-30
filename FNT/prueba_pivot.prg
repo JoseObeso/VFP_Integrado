@@ -1,0 +1,48 @@
+clear
+Archivo_ = FILE(".\bd.ini") 
+   IF Archivo_ = .T. 
+      N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+      x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+      x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+      lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" +  "SERVER=" + x_Server + ";" +  "UID=" + x_UID + ";" + "PWD=" + x_PWD + ";" + "DATABASE=" + x_DBaseName + ";"
+      ?lcStringCnxLocal
+      Sqlsetprop(0,"DispLogin" , 3 ) 
+       * Asignacion de Variables con sus datos 
+      gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+  ENDIF
+
+?gconecta
+
+
+
+Local lcSelect As String,  lnnro_dia As Number
+
+
+    TEXT TO lver noshow
+       select numero_dia as nro_dia, cem as valor from [BDPERSONAL].[dbo].[TMP_CUENTA_CEM]
+    ENDTEXT
+    lejecuta = sqlexec(gconecta,lver,"testpivot")
+    SELECT testpivot
+    lcSelect = "Select "
+    For lnnro_dia = 1 To 31
+        Text To m.lcSelect Additive  Textmerge Noshow Pretext 15
+                Max(Iif(nro_dia = <<m.lnnro_dia>>, valor, 00000)) As dia<<TRANSFORM(m.lnnro_dia, "@L 99")>>,
+        ENDTEXT
+    ENDFOR
+    lcSelect = Left(m.lcSelect, Len(m.lcSelect) - 1)
+    lcSelect = m.lcSelect + " FROM testpivot"
+    
+    Execscript(m.lcSelect)
+    
+    
+   
+
+    
+    
+    

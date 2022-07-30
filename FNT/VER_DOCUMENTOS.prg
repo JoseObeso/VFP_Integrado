@@ -1,0 +1,5 @@
+Script=CREATEOBJECT("Wscript.Shell") 
+oFolders=Script.SpecialFolders 
+lc_mis_documentos = oFolders.Item("MyDocuments") 
+?lc_mis_documentos
+

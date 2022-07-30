@@ -1,0 +1,34 @@
+CLEAR
+
+lcanio = '2017'
+lcmes = '09'
+lnanio = VAL(lcanio)
+lnmes = VAL(lcmes)
+lcfecha_inicio = lcanio + '-' + lcmes + '-' + '01'
+?lcfecha_inicio
+lcfechafinal_vfp = GOMONTH(DATE(lnanio, lnmes,1),+1)-1
+lcdia_final = ALLTRIM(STR(DAY(lcfechafinal_vfp)))
+lcfecha_final = lcanio + '-' + lcmes + '-' + lcdia_final 
+?lcfecha_final
+
+
+
+
+lc_fecha1 = '2017-09-01'
+lc_fecha2 = '2017-09-31'
+lcipress = '0000005947'
+lcmes = '09' 
+lcanio = '2017'
+lcnombre_archivo = lcipress + '_' + lcmes + '_' + lcanio + '_' + 'TAB1'
+
+ 
+
+
+
+lcnombre_archivo = lcipress + '_' + lcmes + '_' + lcanio + '_' + 'TAB1.XLS'
+?lcnombre_archivo
+COPY TO 'D:\' + lcnombre_archivo  TYPE XLS
+
+
+
+

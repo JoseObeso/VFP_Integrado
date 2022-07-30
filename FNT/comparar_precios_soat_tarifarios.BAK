@@ -1,0 +1,71 @@
+** COMPARAR PRECIOS SOAT - TARIFARIO *
+Archivo_ = FILE(".\bd.ini") 
+   IF Archivo_ = .T. 
+      N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+      x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+      x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+      lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" +  "SERVER=" + x_Server + ";" +  "UID=" + x_UID + ";" + "PWD=" + x_PWD + ";" + "DATABASE=" + x_DBaseName + ";"
+      Sqlsetprop(0,"DispLogin" , 3 ) 
+       * Asignacion de Variables con sus datos 
+      gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+      ?lcStringCnxLocal
+  ENDIF
+
+cMensage = '...BUSCANDO.......' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+ 
+
+TEXT TO lversoat noshow
+  SELECT [CODCPT],[NOMBRE],[PRECIOH],[PRECIO_SOAT_SEGURO],[TIPO_REGISTROS]  FROM [SIGSALUD].[dbo].[COMPARAR_PRECIO_SOAT]
+ENDTEXT
+lejecutabusca = sqlexec(gconecta,lversoat,"tversoat")
+SELECT tversoat
+GO top
+SCAN
+  lcpt = ALLTRIM(tversoat.codcpt)
+  TEXT TO lcomprobar noshow
+    SELECT *   FROM [SIGSALUD].[dbo].[TARIFARIO_SOAT_SEGURO] WHERE CPT = ?lcpt
+  ENDTEXT
+  lejecutabusca = sqlexec(gconecta,lcomprobar,"tverexiste")  
+  SELECT tverexiste
+  nr = RECCOUNT()
+  IF nr > 0
+    lnpreciosoat = tverexiste.soat
+    TEXT TO lagregar_precio noshow
+      update [SIGSALUD].[dbo].[COMPARAR_PRECIO_SOAT] set precio_soat_seguro = ?lnpreciosoat where codcpt = ?lcpt
+    ENDTEXT
+    lejecutabusca = sqlexec(gconecta,lagregar_precio)
+    IF lejecutabusca >0 
+       TEXT TO lmarcar_seguro_soat noshow
+          update [SIGSALUD].[dbo].[TARIFARIO_SOAT_SEGURO] set existe = 'S' WHERE CPT = ?lcpt
+       ENDTEXT
+       lejecutabusca = sqlexec(gconecta,lmarcar_seguro_soat)
+     cMensage = '...PRECIO GRABADO.......' 
+     _Screen.Scalemode = 0
+     Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+    ELSE
+     cMensage = '...ERROR EN GRABACION DE PRECIO.......' 
+     _Screen.Scalemode = 0
+     Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+    ENDIF
+  ELSE
+    TEXT TO lmarcar_tg NOSHOW
+       UPDATE [SIGSALUD].[dbo].[COMPARAR_PRECIO_SOAT]  SET [TIPO_REGISTROS] = 'N' WHERE codcpt= ?lcpt
+    ENDTEXT
+    lejecutabusca = sqlexec(gconecta,lmarcar_tg)
+  ENDIF
+  cMensage = '...ACTUALIZANDO SOAT..' 
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+ENDSCAN
+  cMensage = '...FIN DE PROCESO....'
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+

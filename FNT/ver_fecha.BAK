@@ -1,0 +1,10 @@
+* Programa para ver las fechas 
+CLEAR
+lcfecha_leida = cTOd('04/04/2018')
+lcfecha_dia = PADL(ALLTRIM(STR(day(lcfecha_leida))),2,'0')
+lcfecha_mes = PADL(ALLTRIM(STR(MONTH(lcfecha_leida))), 2, '0')
+lcfecha_anio = ALLTRIM(STR(year(lcfecha_leida)))
+
+lcfecha_seleccion = lcfecha_anio + '-' + lcfecha_mes + '-' + lcfecha_dia 
+
+?lcfecha_seleccion

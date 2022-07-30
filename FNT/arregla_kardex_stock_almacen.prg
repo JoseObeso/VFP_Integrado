@@ -1,0 +1,53 @@
+PUBLIC gconecta
+
+** Leer del INI
+Archivo_ = FILE(".\bd.ini") 
+IF Archivo_ = .T. 
+   N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+   x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+   x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+   lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" + ; 
+          "SERVER=" + x_Server + ";" + ; 
+          "UID=" + x_UID + ";" + ; 
+          "PWD=" + x_PWD + ";" + ; 
+          "DATABASE=" + x_DBaseName + ";"
+  Sqlsetprop(0,"DispLogin" , 3 ) 
+  gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+ENDIF
+  
+
+cMensage = ' INICIANDO PROCESO PARA : '
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+
+TEXT TO laddkardex noshow
+  select ITEM, SALDO from KARDEX where IDTRANSACCION = '16000154' and ALMACEN = 'A' and TIPO_TRANSACCION <> 'ICO' 
+   and fecha between convert(datetime, '2016-04-29',101) +  CAST('08:03:00' AS DATETIME)  and convert(datetime, '2016-04-29',101) +  CAST('08:03:59' AS DATETIME)
+ENDTEXT
+lejecutagrabar = sqlexec(gconecta,laddkardex, "tkar")
+SELECT tkar
+GO top
+SCAN
+ lit = ALLTRIM(tkar.item)
+ lsal = tkar.saldo
+ TEXT TO lactu noshow
+   UPDATE stock SET stock = ?lsal WHERE item = ?lit AND almacen = 'A'
+ ENDTEXT
+ lejecutagrabar = sqlexec(gconecta,lactu)
+ENDSCAN
+
+cMensage = ' STOCK ACTUALIZADO  ' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+ 
+
+
+ 
+    
+     

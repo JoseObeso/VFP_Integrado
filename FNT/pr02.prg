@@ -1,0 +1,7 @@
+* PRUEBA
+
+MESSAGEBOX("Prueba 02")
+QUIT
+
+
+

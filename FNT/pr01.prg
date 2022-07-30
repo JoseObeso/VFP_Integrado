@@ -1,0 +1,5 @@
+* PRUEBA
+
+MESSAGEBOX("Prueba 01")
+
+

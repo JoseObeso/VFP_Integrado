@@ -1,0 +1,95 @@
+PUBLIC gconecta, lmesx, lanio
+
+** Leer del INI
+Archivo_ = FILE(".\bd.ini") 
+IF Archivo_ = .T. 
+   N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+   x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+   x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+   lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" + ; 
+          "SERVER=" + x_Server + ";" + ; 
+          "UID=" + x_UID + ";" + ; 
+          "PWD=" + x_PWD + ";" + ; 
+          "DATABASE=" + x_DBaseName + ";"
+  Sqlsetprop(0,"DispLogin" , 3 ) 
+  gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+ENDIF
+CLEAR
+
+********************* obtiene el ID ********************
+cMensage = ' ****** PROCESANDO E IMPRIMIENDO FUAS ********** '
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+
+
+TEXT TO lselecciona noshow
+    SELECT IDSEGURO, NUMFUA, NFUA_ANTIGUO, NOMBRES FROM [SIGSALUD].[dbo].[NFUAS]
+ENDTEXT
+lejecutagrabar = sqlexec(gconecta,lselecciona, "tsele")
+SELE tsele
+GO top
+SCAN
+  lnfua = ALLTRIM(tsele.numfua)
+  lafua = ALLTRIM(tsele.NFUA_ANTIGUO)
+  TEXT TO lbusca NOSHOW
+    SELECT * FROM V_ATENCION_SEGURO WHERE NRO_ATENCION = ?lnfua AND ESTADO = 2
+  ENDTEXT
+  lejecutagrabar = sqlexec(gconecta,lbusca, "tbus")
+  SELE tbus
+  tt_refe = IIF(tbus.TIPO_ATEN="R", "X", "")
+  tt_emer = IIF(tbus.TIPO_ATEN="E", "X", "")
+  sexo1 = IIF(SEXO="M", "X", "")
+  sexo2 = IIF(SEXO="F", "X", "")
+  nombres = ALLTRIM(tbus.nombres)
+  lfechaaten = tbus.fecha_atencion
+  lhoraatencion = tbus.hora_aten
+  ltipopresta = ALLTRIM(tbus.tipo_prestacion)
+  lorigen = ALLTRIM(tbus.origen)
+  fecha = ALLTRIM(DTOC(tbus.fecha_nac))
+  dia1 = SUBSTR(ALLTRIM(DTOC(tbus.fecha_nac)),1,1)
+  dia2 = SUBSTR(ALLTRIM(DTOC(tbus.fecha_nac)),2,1)
+  mes1 = SUBSTR(ALLTRIM(DTOC(tbus.fecha_nac)),4,1)
+  mes2 = SUBSTR(ALLTRIM(DTOC(tbus.fecha_nac)),5,1)
+  anio1 = SUBSTR(ALLTRIM(DTOC(tbus.fecha_nac)),7,1)
+  anio2 = SUBSTR(ALLTRIM(DTOC(tbus.fecha_nac)),8,1)
+  anio3 = SUBSTR(ALLTRIM(DTOC(tbus.fecha_nac)),9,1)
+  anio4 = SUBSTR(ALLTRIM(DTOC(tbus.fecha_nac)),10,1)
+  tges = IIF(tbus.TIPO_GESTANTE="01", "X", "")
+  tpuer = IIF(tbus.TIPO_GESTANTE="02", "X", "")
+  diaaten1 = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', SUBSTR(ALLTRIM(DTOC(tbus.fecha_atencion)),1,1))
+  diaaten2 = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', SUBSTR(ALLTRIM(DTOC(tbus.fecha_atencion)),2,1))
+  mesaten1 = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', SUBSTR(ALLTRIM(DTOC(tbus.fecha_atencion)),4,1))
+  mesaten2 = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', SUBSTR(ALLTRIM(DTOC(tbus.fecha_atencion)),5,1))
+  anioaten1 = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', SUBSTR(ALLTRIM(DTOC(tbus.fecha_atencion)),7,1))
+  anioaten2 = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', SUBSTR(ALLTRIM(DTOC(tbus.fecha_atencion)),8,1))
+  anioaten3 = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', SUBSTR(ALLTRIM(DTOC(tbus.fecha_atencion)),9,1))
+  anioaten4 = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', SUBSTR(ALLTRIM(DTOC(tbus.fecha_atencion)),10,1))
+  horatencion = IIF(tbus.TIPO_PRESTACION = "112" or tbus.TIPO_PRESTACION = "113" or tbus.TIPO_PRESTACION = "114" or tbus.TIPO_PRESTACION = "117" OR tbus.TIPO_PRESTACION = "064" OR tbus.TIPO_PRESTACION = "065" OR tbus.TIPO_PRESTACION = '066' OR tbus.ORIGEN = 'HO', '', ALLTRIM(tbus.hora_aten))
+  TEXT TO lgrab132 noshow
+    INSERT INTO [SIGSALUD].[dbo].[fuas132] (nfua_errado, nfua_ok, nombres, fecha_atencion, hora_atencion, tipo_prestacion, origen, fecha_impresion)
+        VALUES (?lafua, ?lnfua, ?nombres, ?lfechaaten, ?lhoraatencion, ?ltipopresta, ?lorigen, getdate())
+  ENDTEXT
+  lejecutagrabar = sqlexec(gconecta,lgrab132)
+  cMensage = '----------------------------- GRABANDO PARA :  ' + nombres
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+ * REPORT FORM rptseguro.frx TO PRINTER NOCONSOLE
+  cMensage = ' ---------------------------  IMPRIMIENDO, PARA : '  + lnfua + '  PACIENTE :   ' + nombres
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+ENDSCAN
+cMensage = ' IMPRESION CULMINADA, REVISE...............'
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+CLOSE DATABASES ALL
+
+
+
+
+

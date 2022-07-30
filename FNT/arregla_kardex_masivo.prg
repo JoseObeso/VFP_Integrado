@@ -1,0 +1,145 @@
+PUBLIC gconecta
+
+** Leer del INI
+Archivo_ = FILE(".\bd.ini") 
+IF Archivo_ = .T. 
+   N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+   x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+   x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+   lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" + ; 
+          "SERVER=" + x_Server + ";" + ; 
+          "UID=" + x_UID + ";" + ; 
+          "PWD=" + x_PWD + ";" + ; 
+          "DATABASE=" + x_DBaseName + ";"
+  Sqlsetprop(0,"DispLogin" , 3 ) 
+  gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+ENDIF
+  
+* lfecha = '2015-07-16'
+* litem =  '170069'
+lalmacen = 'F'
+* lsaldoinicial = 173
+
+cMensage = ' INICIANDO PROCESO PARA LOS ITEMS DESDE FECHA INICIAL ' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+TEXT TO laddkardex noshow
+    Alter Table KARDEX add idkardex integer identity 
+ENDTEXT
+lejecutagrabar = sqlexec(gconecta,laddkardex)
+
+cMensage = ' Seleccionando ITEMS  '
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+
+TEXT TO lrevisastock noshow
+  declare @lalmacen varchar(1) = ?lalmacen
+  SELECT ITEM FROM STOCK  WHERE ALMACEN = @lalmacen ORDER BY ITEM ASC
+ENDTEXT
+lejecutagrabar = sqlexec(gconecta,lrevisastock, "tstock")
+SELECT tstock
+GO top
+SCAN
+  litem = ALLTRIM(tsTock.item)
+  TEXT TO lnombre noshow
+      declare @litem varchar(10) = ?litem
+      SELECT UPPER(nombre) AS NOMBRE FROM item WHERE ITEM = @litem 
+  ENDTEXT
+  lejecutagrabar = sqlexec(gconecta,lnombre,"lnom")
+  SELECT lnom
+  lnombre = lnom.nombre
+  cMensage = ' BUSCANDO KARDEX: ' + SUBSTR(lnombre,1,150)
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+  
+  TEXT TO lobtenerstock noshow
+      declare @litem varchar(10) = ?litem
+      declare @lalmacen varchar(1) = ?lalmacen
+      SELECT * FROM KARDEX WHERE ITEM = @litem and FECHA = (SELECT MIN(FECHA) as fecha  FROM KARDEX WHERE ITEM = @litem and almacen = @lalmacen)
+  ENDTEXT
+  lejecutagrabar = sqlexec(gconecta,lobtenerstock,"lstockinicial")
+  SELECT lstockinicial  
+  nregistros = RECCOUNT()
+  IF nregistros = 0
+    cMensage = ' NO EXISTE KARDEX PARA : ' + SUBSTR(lnombre,1,150)
+    _Screen.Scalemode = 0
+    Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+  ELSE
+     SELECT lstockinicial
+     lnstock = lstockinicial.stock
+     TEXT TO lgrabaprimerstock noshow
+         declare @litem varchar(10) = ?litem
+         declare @lalmacen varchar(1) = ?lalmacen
+         declare @lsaldoinicial int = ?lnstock
+         update stock set STOCK = @lsaldoinicial where ITEM = @litem AND ALMACEN = @lalmacen
+     ENDTEXT
+     lejecutagrabar = sqlexec(gconecta,lgrabaprimerstock)
+     TEXT TO lobtienekardex noshow
+       declare @litem varchar(10) = ?litem
+       declare @lalmacen varchar(1) = ?lalmacen
+       SELECT * FROM KARDEX WHERE ITEM = @litem and  almacen = @lalmacen order by FECHA asc
+     ENDTEXT
+     lejecutagrabar = sqlexec(gconecta,lobtienekardex, "tkardex")
+     SELECT tkardex
+     GO top
+     SCAN
+       lidkar = tkardex.idkardex
+       lstock = tkardex.stock
+       lncantidad = tkardex.cantidad
+       lnsaldo = tkardex.saldo
+       ltipotra= ALLTRIM(tkardex.tipo_transaccion)
+       lfecha = tkardex.fecha
+       TEXT TO lbuscastockx noshow
+          declare @litem varchar(10) = ?litem
+          declare @lalmacen varchar(1) = ?lalmacen
+          select STOCK from stock where ITEM = @litem AND ALMACEN = @lalmacen  
+       ENDTEXT
+       lejecutagrabar = sqlexec(gconecta,lbuscastockx, "tst")
+       lnstock = tst.stock
+       IF ALLTRIM(ltipotra) = 'IAN' OR ALLTRIM(ltipotra) = 'ITR' OR ALLTRIM(ltipotra) = 'IDE'
+           lnnsaldo =   lnstock  + lncantidad
+       ELSE
+           lnnsaldo =   lnstock  - lncantidad
+       ENDIF
+       TEXT TO lactualiza noshow
+            UPDATE KARDEX SET stock = ?lnstock, saldo = ?lnnsaldo WHERE idkardex = ?lidkar
+       ENDTEXT
+       lejecutagrabar = sqlexec(gconecta,lactualiza)
+       TEXT TO lultimo5 noshow
+          declare @litem varchar(10) = ?litem
+          declare @lalmacen varchar(1) = ?lalmacen
+          declare @lnnsaldox int = ?lnnsaldo
+          update stock set STOCK = @lnnsaldox where ITEM = @litem AND ALMACEN = @lalmacen
+       ENDTEXT
+       lejecutagrabar = sqlexec(gconecta,lultimo5)
+       cMensage = ' PROCESANDO ITEM : ' + SUBSTR(lnombre,1,80)  + ' FECHA : '  + DTOC(lfecha)  + ' TIPO DE TRANSACCION : ' + ltipotra
+       _Screen.Scalemode = 0
+       Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+     ENDSCAN
+     cMensage = ' SIGUIENTE ITEM '
+     _Screen.Scalemode = 0
+     Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+   ENDIF
+     
+ENDSCAN
+
+cMensage = ' ULTIMO PROCESO  ' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+TEXT TO lelimidkardex noshow
+   Alter Table kardex  Drop Column idkardex 
+ENDTEXT
+lejecutagrabar = sqlexec(gconecta,lelimidkardex)
+cMensage = ' FIN DE PROCESO PARA : ' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+
+ 
+    
+     

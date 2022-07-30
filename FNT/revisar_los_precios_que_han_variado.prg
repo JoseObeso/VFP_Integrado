@@ -1,0 +1,69 @@
+** GENERACION DE TARIFARIO ABRIL 2017 *
+
+Archivo_ = FILE(".\bd.ini") 
+   IF Archivo_ = .T. 
+      N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+      x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+      x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+      lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" +  "SERVER=" + x_Server + ";" +  "UID=" + x_UID + ";" + "PWD=" + x_PWD + ";" + "DATABASE=" + x_DBaseName + ";"
+      ?lcStringCnxLocal
+      Sqlsetprop(0,"DispLogin" , 3 ) 
+       * Asignacion de Variables con sus datos 
+      gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+  ENDIF
+
+cMensage = '...LIMPIANDO  TABLAS.......' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+
+TEXT TO lver_modi NOSHOW
+   UPDATE [SIGSALUD].[dbo].[TARIFARIO_ABRIL_2017_V2] SET proceso = ''
+ENDTEXT
+lejecutabusca = sqlexec(gconecta,lver_modi)  
+
+
+
+
+TEXT TO lqry_listar_precio_ntarifario_2017 noshow
+  USE SIGSALUD
+  SELECT CODCPT, NOMBRE, PRECIOA, PRECIOSIS, PRECIOSOAT, COMENTARIO, PROCESO  FROM [SIGSALUD].[dbo].[TARIFARIO_ABRIL_2017_V2]
+ENDTEXT
+lejecutabusca = sqlexec(gconecta,lqry_listar_precio_ntarifario_2017, "tar2017")  
+SELECT tar2017
+GO top
+SCAN
+  lcccodcpt = ALLTRIM(tar2017.codcpt)
+  lnpreciopa = tar2017.precioa
+  
+  TEXT TO lqry_buscar_precio noshow
+    SELECT PRECIOA  FROM [SIGSALUD].[dbo].[TARIFARIO_MARZO_2017]  WHERE ACTIVO = '1' AND CODCPT = ?lcccodcpt
+  ENDTEXT
+  lejecutabusca = sqlexec(gconecta,lqry_buscar_precio, "tbuspre")  
+  SELECT tbuspre
+  lnprecio_marzo = tbuspre.precioa
+  IF lnprecio_marzo = lnpreciopa
+      TEXT TO lqry_update_igual noshow
+          UPDATE [SIGSALUD].[dbo].[TARIFARIO_ABRIL_2017_V2] SET proceso = 'I', PRECIO_MARZO = ?lnprecio_marzo WHERE codcpt = ?lcccodcpt
+      ENDTEXT
+      lejecutabusca = sqlexec(gconecta,lqry_update_igual)      
+  ELSE
+      TEXT TO lqry_update_vario noshow
+          UPDATE [SIGSALUD].[dbo].[TARIFARIO_ABRIL_2017_V2] SET proceso = 'V', PRECIO_MARZO = ?lnprecio_marzo  WHERE codcpt = ?lcccodcpt
+      ENDTEXT
+      lejecutabusca = sqlexec(gconecta,lqry_update_vario)      
+  ENDIF
+  cMensage = '...PASANDO AL SIGUIENTE REGISTRO ...' +lcccodcpt
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+    
+ENDSCAN
+
+cMensage = '...PROCESO FINALIZADO.........' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  

@@ -1,0 +1,60 @@
+** PERMITE IGUAL SEEM CON EMERGENCIA *
+
+CLEAR
+Archivo_ = FILE(".\bd.ini") 
+   IF Archivo_ = .T. 
+      N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+      x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+      x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+      lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" +  "SERVER=" + x_Server + ";" +  "UID=" + x_UID + ";" + "PWD=" + x_PWD + ";" + "DATABASE=" + x_DBaseName + ";"
+      Sqlsetprop(0,"DispLogin" , 3 ) 
+       * Asignacion de Variables con sus datos 
+      gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+  ENDIF
+?lcStringCnxLocal
+
+lnmes = 4
+lnanio = 2018
+
+TEXT TO lver_historia noshow
+  TRUNCATE TABLE [SIGSALUD].[dbo].[SEEM-V-EMERGENCIA]
+    select numhc from [SIGSALUD].[dbo].[SEEM_EMERGENCIA_PROCESADO] group by NUMHC 
+ENDTEXT
+lejecutabusca = sqlexec(gconecta,lver_historia,"thisto")
+SELECT thisto
+GO top
+SCAN
+  lc_historia = ALLTRIM(thisto.numhc)
+  TEXT TO lqry_grabado noshow
+       declare @lc_historia varchar(13) = ?lc_historia
+       declare @ln_mes int = 4
+       declare @ln_anio int = 2018
+       INSERT INTO [SIGSALUD].[dbo].[SEEM-V-EMERGENCIA]([ESTADO],[EMERGENCIA_ID],[FECHA],[HORA],[ORDEN],[PACIENTE],[HISTORIA],[NOMBRES],[FECHA_NACIMIENTO],[SEXO],
+    [NOMBRE_SEGURO],[NOMBRE_DIAGNOSTICO],[CONSULTORIO],[NOMBRE_CONSULTORIO],[CUENTAID],[MOTIVO_EMERGENCIA],[USUARIO],[NOMBRE_MOTIVO],[MEDICO],[NOMBRE_MEDICO],
+      [DIRECCION],[ESTADO_CIVIL],[NOMBRE_ESTADOCIVIL],[DISTRITO],[DOCUMENTO],[DOCUMENTOA],[TELEFONO1],[TELEFONO2],[ACOMPANANTE],[PATERNO],[MATERNO],[NOMBRE_PACIENTE],
+      [EDAD],[NOMBRE],[NOMBRE_SEXO],[SEGURO],[PRE_AFILIACION],[OBSERVACION1],[OBSERVACION2],[LOCALIDAD],[Nombre_Localidad],[CONSULTORIO1],[CIEX4],[MEDICO1],[ENTIDAD],
+      [HORA_ATEN],[ESTABLECIMIENTO],[CONDICION_EGRESO],[FECHA_ING],[FECHA_SAL],[NUMCAMA],[HORA_ING],[HORA_SAL],[HORA_EST],[DESTINO],[CIEX3],[CIEX2],[CIEX1],[ESTANCIA],
+      [DESEGRESO],[TIPOATENCION],[PRIORIDAD],[MEDICO2],[CIEX5],[FECHA_ING1],[FECHA_SAL1],[NUMCAMA1],[HORA_ING1],[HORA_SAL1],[HORA_EST1],[CIEX6],[CIEX7],[CIEX8],[CIEX9],
+      [RELIGION],[DESRELIGION],[QUIEN_ATIENDE],[SEGUROLIQ])
+      select *  from [SIGSALUD].[dbo].[v_emergencia] where 
+         month(convert(date, fecha_sal)) = @ln_mes and year(convert(date, fecha_sal)) = @ln_anio    and CIEX1 <> '0' and
+         FECHA_SAL <> '' and FECHA_SAL <> '__/__/__  ' and historia = @lc_historia
+  ENDTEXT
+  lejecutabusca = sqlexec(gconecta,lqry_grabado)
+  IF lejecutabusca>0
+   ?'conforme'
+  ELSE
+   ? 'no grabo'
+  ENDIF
+ENDSCAN
+
+cMensage = '...FIN DE PROCESO ......'
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+?'terminado'

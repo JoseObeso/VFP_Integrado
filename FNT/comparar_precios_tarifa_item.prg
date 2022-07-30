@@ -1,0 +1,104 @@
+** COMPARA PRECIOS TARIFARIO SOAT - PRECIOS GRABADOS 
+CLEAR
+
+Archivo_ = FILE(".\bd.ini") 
+   IF Archivo_ = .T. 
+      N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+      x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+      x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+      lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" +  "SERVER=" + x_Server + ";" +  "UID=" + x_UID + ";" + "PWD=" + x_PWD + ";" + "DATABASE=" + x_DBaseName + ";"
+      ?lcStringCnxLocal
+      Sqlsetprop(0,"DispLogin" , 3 ) 
+       * Asignacion de Variables con sus datos 
+      gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+  ENDIF
+
+cMensage = '...BUSCANDO TODAS LAS CUENTAS SOAT ...' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+
+
+TEXT TO lqry_limpiar noshow
+  TRUNCATE TABLE [SIGSALUD].[dbo].[COMPARATIVO_PRECIO_TARIFA]
+ENDTEXT
+lejecutabusca = sqlexec(gconecta,lqry_limpiar)    
+
+
+
+TEXT TO lqry_obtener_cuentas_soat noshow
+   SELECT CUENTAID, PACIENTE, SEGURO, EMPRESASEGURO, OBSERVACION, convert(varchar(10), FECHA_APERTURA, 103) as FECHA, CARGO, DESCUENTO, ABONO, IMPORTE, ESTADO, HORA_APERTURA, NOMBRE, ORIGEN,
+     USUARIO_APERTURA  FROM CUENTA WHERE SEGURO = '02' AND ESTADO = '2' AND FECHA_APERTURA BETWEEN CONVERT(DATETIME, '2016-06-20', 101) AND CONVERT(DATETIME, '2017-05-04', 101)
+        ORDER BY FECHA_APERTURA DESC
+ENDTEXT
+lejecutabusca = sqlexec(gconecta,lqry_obtener_cuentas_soat, "t_ctas")  
+SELECT t_ctas
+GO top
+SCAN  
+   lidcuenta = ALLTRIM(t_ctas.cuentaid)
+   lcnombre_paciente = ALLTRIM(t_ctas.nombre)
+   lcfecha = ALLTRIM(t_ctas.fecha)
+    
+   cMensage = '...PACIENTE : ' +lcnombre_paciente
+   _Screen.Scalemode = 0
+   Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+   
+   TEXT TO lqry_obtener_precio noshow
+      SELECT ITEM, precio FROM CUENTADET WHERE CUENTAID = ?lidcuenta and SUBSTRING(item,1,1) in ('5','6') order by ITEM asc
+   ENDTEXT
+   lejecutabusca = sqlexec(gconecta,lqry_obtener_precio, "t_preciocta")
+   SELECT t_preciocta
+   GO top
+   SCAN
+      lcitem = ALLTRIM(t_preciocta.item)
+      lnprecio = t_preciocta.precio
+      
+      cMensage = '...BUSCADO PRECIO.... : ' +lcitem
+      _Screen.Scalemode = 0
+      Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+      
+      TEXT TO lqry_codcpt noshow
+        SELECT nombre, codcpt FROM item WHERE item = ?lcitem
+      ENDTEXT
+     lejecutabusca = sqlexec(gconecta,lqry_codcpt, "t_cpt")      
+     SELECT t_cpt
+     lccpt = ALLTRIM(t_cpt.codcpt)
+     lcnombreitem = ALLTRIM(t_cpt.nombre)
+     TEXT TO lqry_obtener_precio_tarifa noshow
+        select ITEM, precioh from PRECIO where item = ?lcitem
+     ENDTEXT
+     lejecutabusca = sqlexec(gconecta,lqry_obtener_precio_tarifa, "t_tarifa")
+     SELECT t_tarifa
+     lnprecioh = t_tarifa.precioh
+     IF lnprecio <> lnprecioh
+         TEXT TO lqry_grabar_comparativo noshow
+           INSERT INTO [SIGSALUD].[dbo].[COMPARATIVO_PRECIO_TARIFA]([ITEM],[CODCPT],[DESCRIPCION],[PRECIOTARIFA],[PRECIOCUENTA],[CUENTAID],[NOMBRES],[FECHA])
+             VALUES (?lcitem,?lccpt, ?lcnombreitem, ?lnprecioh, ?lnprecio, ?lidcuenta, ?lcnombre_paciente, ?lcfecha)
+         ENDTEXT
+         lejecutabusca = sqlexec(gconecta,lqry_grabar_comparativo)
+         IF lejecutabusca > 0
+           cMensage = '...AGREGANDO ITEM A LA TABLA COMPARATIVA....'
+           _Screen.Scalemode = 0
+           Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+          ELSE
+           cMensage = '...FALLA AL GRABAR...........' 
+           _Screen.Scalemode = 0
+           Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+         ENDIF
+     ENDIF
+     
+  ENDSCAN
+  cMensage = '...PASEMOS AL SIGUIENTE...........' 
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+  
+ENDSCAN
+
+cMensage = '...PROCESO TERMINADO FINALMENTE.........' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  

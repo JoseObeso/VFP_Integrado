@@ -1,0 +1,141 @@
+** Revsiar cuentas al detalle de liquidaciones *
+Archivo_ = FILE(".\bd.ini") 
+   IF Archivo_ = .T. 
+      N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+      x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+      N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+      x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+      x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+      lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" +  "SERVER=" + x_Server + ";" +  "UID=" + x_UID + ";" + "PWD=" + x_PWD + ";" + "DATABASE=" + x_DBaseName + ";"
+      Sqlsetprop(0,"DispLogin" , 3 ) 
+       * Asignacion de Variables con sus datos 
+      gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+  ENDIF
+
+cMensage = '...BUSCANDO.......' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+
+TEXT TO lvercuenta noshow
+  USE SIGSALUD	
+  DECLARE @lsexo VARCHAR(1) = 'F'
+  declare @lservicio varchar(100) = 'MEDICINA GENERAL' 
+  SELECT COUNT(SERVICIO) AS MENOR_1_MES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 3
+  SELECT COUNT(SERVICIO) AS DE_1_A_11_MESES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 2 AND Edad BETWEEN 1 AND 11
+  SELECT COUNT(SERVICIO) AS DE_1_A_5_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 1 AND Edad BETWEEN 1 AND 5
+  SELECT COUNT(SERVICIO) AS DE_6_A_10_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 1 AND Edad BETWEEN 6 AND 10
+  SELECT COUNT(SERVICIO) AS DE_11_A_14_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 1 AND Edad BETWEEN 11 AND 14
+  SELECT COUNT(SERVICIO) AS DE_15_A_24_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 1 AND Edad BETWEEN 15 AND 24
+  SELECT COUNT(SERVICIO) AS DE_25_A_44_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 1 AND Edad BETWEEN 25 AND 44
+  SELECT COUNT(SERVICIO) AS DE_45_A_64_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 1 AND Edad BETWEEN 45 AND 64
+  SELECT COUNT(SERVICIO) AS DE_64_A_MAS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO = @lservicio AND TipoEdad = 1 AND Edad BETWEEN 65 AND 500
+ENDTEXT
+lejecutabusca = sqlexec(gconecta,lvercuenta,"tcta")
+SELECT tcta
+lservicio = 'MEDICINA'
+lm1 = ''
+
+  
+
+
+
+/* GINECOLOGIA_OBSTETRICIA */
+declare @lservicio1 varchar(100) = 'GINECOLOGIA' 
+declare @lservicio2 varchar(100) = 'OBSTETRICIA' 
+
+SELECT COUNT(SERVICIO) AS MENOR_1_MES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 3
+SELECT COUNT(SERVICIO) AS DE_1_A_11_MESES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 2 AND Edad BETWEEN 1 AND 11
+SELECT COUNT(SERVICIO) AS DE_1_A_5_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 1 AND Edad BETWEEN 1 AND 5
+SELECT COUNT(SERVICIO) AS DE_6_A_10_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 1 AND Edad BETWEEN 6 AND 10
+SELECT COUNT(SERVICIO) AS DE_11_A_14_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 1 AND Edad BETWEEN 11 AND 14
+SELECT COUNT(SERVICIO) AS DE_15_A_24_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 1 AND Edad BETWEEN 15 AND 24
+SELECT COUNT(SERVICIO) AS DE_25_A_44_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 1 AND Edad BETWEEN 25 AND 44
+SELECT COUNT(SERVICIO) AS DE_45_A_64_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 1 AND Edad BETWEEN 45 AND 64
+SELECT COUNT(SERVICIO) AS DE_64_A_MAS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio1, @lservicio2) AND TipoEdad = 1 AND Edad BETWEEN 65 AND 500
+
+
+
+/* CIRUGIA : CIRUGIA, CIRUGIA PLASTICA, OFTALMOLOGIA, UROLOGIA */
+declare @lservicio3 varchar(100) = 'CIRUGIA GENERAL' 
+declare @lservicio4 varchar(100) = 'CIRUGIA PLASTICA' 
+declare @lservicio5 varchar(100) = 'OFTALMOLOGIA' 
+declare @lservicio6 varchar(100) = 'UROLOGIA' 
+
+SELECT COUNT(SERVICIO) AS MENOR_1_MES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 3
+SELECT COUNT(SERVICIO) AS DE_1_A_11_MESES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 2 AND Edad BETWEEN 1 AND 11
+SELECT COUNT(SERVICIO) AS DE_1_A_5_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 1 AND Edad BETWEEN 1 AND 5
+SELECT COUNT(SERVICIO) AS DE_6_A_10_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 1 AND Edad BETWEEN 6 AND 10
+SELECT COUNT(SERVICIO) AS DE_11_A_14_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 1 AND Edad BETWEEN 11 AND 14
+SELECT COUNT(SERVICIO) AS DE_15_A_24_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 1 AND Edad BETWEEN 15 AND 24
+SELECT COUNT(SERVICIO) AS DE_25_A_44_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 1 AND Edad BETWEEN 25 AND 44
+SELECT COUNT(SERVICIO) AS DE_45_A_64_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 1 AND Edad BETWEEN 45 AND 64
+SELECT COUNT(SERVICIO) AS DE_64_A_MAS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio3, @lservicio4, @lservicio5, @lservicio6) AND TipoEdad = 1 AND Edad BETWEEN 65 AND 500
+
+
+/* TRAUMATOLOGIA  */
+declare @lservicio7 varchar(100) = 'TRAUMATOLOGIA Y ORTOPEDIA' 
+
+SELECT COUNT(SERVICIO) AS MENOR_1_MES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 3
+SELECT COUNT(SERVICIO) AS DE_1_A_11_MESES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 2 AND Edad BETWEEN 1 AND 11
+SELECT COUNT(SERVICIO) AS DE_1_A_5_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 1 AND Edad BETWEEN 1 AND 5
+SELECT COUNT(SERVICIO) AS DE_6_A_10_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 1 AND Edad BETWEEN 6 AND 10
+SELECT COUNT(SERVICIO) AS DE_11_A_14_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 1 AND Edad BETWEEN 11 AND 14
+SELECT COUNT(SERVICIO) AS DE_15_A_24_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 1 AND Edad BETWEEN 15 AND 24
+SELECT COUNT(SERVICIO) AS DE_25_A_44_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 1 AND Edad BETWEEN 25 AND 44
+SELECT COUNT(SERVICIO) AS DE_45_A_64_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 1 AND Edad BETWEEN 45 AND 64
+SELECT COUNT(SERVICIO) AS DE_64_A_MAS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio7) AND TipoEdad = 1 AND Edad BETWEEN 65 AND 500
+
+
+
+/* PEDIATRIA   */
+declare @lservicio8 varchar(100) = 'PEDIATRIA GENERAL' 
+declare @lservicio9 varchar(100) = 'NEONATOLOGIA' 
+
+SELECT COUNT(SERVICIO) AS MENOR_1_MES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 3
+SELECT COUNT(SERVICIO) AS DE_1_A_11_MESES FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 2 AND Edad BETWEEN 1 AND 11
+SELECT COUNT(SERVICIO) AS DE_1_A_5_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 1 AND Edad BETWEEN 1 AND 5
+SELECT COUNT(SERVICIO) AS DE_6_A_10_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 1 AND Edad BETWEEN 6 AND 10
+SELECT COUNT(SERVICIO) AS DE_11_A_14_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 1 AND Edad BETWEEN 11 AND 14
+SELECT COUNT(SERVICIO) AS DE_15_A_24_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 1 AND Edad BETWEEN 15 AND 24
+SELECT COUNT(SERVICIO) AS DE_25_A_44_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 1 AND Edad BETWEEN 25 AND 44
+SELECT COUNT(SERVICIO) AS DE_45_A_64_AÑOS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 1 AND Edad BETWEEN 45 AND 64
+SELECT COUNT(SERVICIO) AS DE_64_A_MAS FROM dbo.HOSPITALIZACION_EMERGENCIA WHERE SEXO = @lsexo AND SERVICIO IN (@lservicio8, @lservicio9) AND TipoEdad = 1 AND Edad BETWEEN 65 AND 500
+
+
+ENDTEXT
+lejecutabusca = sqlexec(gconecta,lvercuenta,"tcta")
+
+?lejecutabusca 
+SELECT tcta
+lnr = RECCOUNT() 
+IF lnr = 0
+   cMensage = '...NO EXISTEN CUENTAS EN ESTE RANGO DE FECHAS...' 
+   _Screen.Scalemode = 0
+   Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+ELSE
+GO TOP
+SCAN
+  lidcta = ALLTRIM(tcta.cuentaid)
+  lntotal = tcta.importe
+  TEXT TO lbusca noshow
+     select case when SUM(TOTAL) is null then 0 else SUM(TOTAL) end  AS TOTAL from CUENTADET where CUENTAID = ?lidcta
+  ENDTEXT
+  lejecutabusca = sqlexec(gconecta,lbusca,"tctadet")
+  SELECT tctadet
+  lntotaldet = tctadet.total
+  IF lntotal =  lntotaldet
+    TEXT TO llimpiar noshow
+      DELETE FROM [SIGSALUD].[dbo].[TMP_CTA_REV] WHERE cuentaid = ?lidcta
+    ENDTEXT
+    lejecutabusca = sqlexec(gconecta,llimpiar)
+  ENDIF
+  cMensage = '...COMPARANDO CUENTAS : ' +lidcta
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait  
+ENDSCAN
+
+ENDIF

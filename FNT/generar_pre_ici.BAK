@@ -1,0 +1,340 @@
+* Programa para generar el PRE - ICI *
+PUBLIC gconecta
+** Leer del INI
+Archivo_ = FILE(".\bd.ini") 
+IF Archivo_ = .T. 
+   N_Cadena = ALLTRIM(FILETOSTR(".\bd.ini")) 
+   x_Server = ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_UID =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_PWD =    ALLTRIM(SUBSTR(N_Cadena,1,(ATC(CHR(13),N_Cadena,1) - 1))) 
+   N_Cadena = ALLTRIM(RIGHT(N_Cadena,LEN(N_Cadena) - ( ATC(CHR(13),N_Cadena,1) + 1 ))) 
+   x_Change = CHRTRAN(N_Cadena,CHR(13),"*") 
+   x_DBaseName = Substr(x_Change,1,ATC("*",x_Change,1)-1) 
+   lcStringCnxLocal = "Driver={SQL Server Native Client 10.0};" + ; 
+          "SERVER=" + x_Server + ";" + ; 
+          "UID=" + x_UID + ";" + ; 
+          "PWD=" + x_PWD + ";" + ; 
+          "DATABASE=" + x_DBaseName + ";"
+  Sqlsetprop(0,"DispLogin" , 3 ) 
+  gconecta=SQLSTRINGCONNECT(lcStringCnxLocal)
+ENDIF
+
+cMensage = ' ... SELECCIONANDO ITEMS DE LA BD GENERAL....RECUERDE : CON LA PACIENCIA Y TRANQUILIDAD SE RESULEVE TODO...'
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+
+lcfechainicio = '2016-09-30'
+lcfechafin = '2016-10-27'
+
+lcoperacioninicial = '16451754'
+lcoperacionfinal = '16504404'
+
+
+
+TEXT TO lobtener_items noshow
+  use SIGSALUD
+  truncate table  [SIGSALUD].[dbo].[TMP_PRE_ICI]
+  INSERT INTO [SIGSALUD].[dbo].[TMP_PRE_ICI]([ITEM], [SISMED], [NOMBRE], [PRESENTACION], DFECHA_INICIO_PROCESO)
+  select ITEM, interfase2 AS SISMED, UPPER(NOMBRE) as nombre, UPPER(PRESENTACION) AS PRESENTACION, GETDATE() AS DFECHA_INICIO_PROCESO from ITEM where  SUBSTRING(item,1,2) = '17' and ITEM not in ('179999', '170797', '170274', '170313', '170121', '170129', '170223', '170785', '170786', '170826', '170855', '170870',
+      '170871', '170868', '170873', '170874', '170878', '170879', '170883', '170885', '170886', '170887', '170888', '170889', '170931', '170932', '170933', '170934', '170935', '170938', '170940', '170944',
+      '170959', '170960', '170966', '170967', '170980', '170981', '170982', '170983', '170984', '170988', '170986', '170989', '170992', '171002', '171005', '171006', '171007', '171009', '171012', '171015', '171016', '171017', '171018', '171020', '171020', '171020', '171022', '171023', '171025', '171026', '171027', '171028', '171029', '171030', 
+      '171032', '171033', '171033', '171031', '171034', '171035', '171037', '171038', '171039', '171040', '171041', '171043', '171046', '171047', '171048', '171058', '171059',
+      '171060', '171062', '171069', '171073', '171074', '171075', '171076', '171077', '171078', '171079', '171092', '171093', '171096', '171099', '171100', '171101', '171103',
+      '171104', '171106', '171111', '171116', '171118', '171121', '171122', '171125', '171126', '171127', '171128', '171130', '171131', '171132', '171133', '171134', '171136',
+      '171137', '171138', '171140', '171146', '171147', '171148', '171149', '171152', '171153', '171157', '171158', '171159', '171161', '171160', '171162', '171163', '171164',
+      '171165', '171166', '171167', '171168', '171169', '171170', '171171', '171172', '171173', '171174', '171175', '171176', '171177', '171183', '171184', '171185', '171186',
+      '171187', '171188', '171190', '171192', '171197', '171231', '171233', '171237') and not substring(NOMBRE,1,3) in ('don', 'coe', 'pel') 
+       and clase = 'A' order by nombre asc 
+  SELECT * FROM [SIGSALUD].[dbo].[TMP_PRE_ICI]
+ENDTEXT
+lejecuta=SQLEXEC(gconecta,lobtener_items,"titems") 
+SELECT titems
+GO top
+SCAN
+ lcitem = ALLTRIM(titems.item)
+ lcnombre = ALLTRIM(titems.nombre)
+ 
+ * obtener el stock del almacen 
+ TEXT TO lver_stock_almacen noshow
+   declare @lfechainicio datetime = convert(datetime, ?lcfechainicio,101) +  CAST('00:00:00' AS DATETIME)
+   declare @lfechafin datetime = convert(datetime, ?lcfechafin,101) + CAST('23:59:00' AS DATETIME)
+   declare @lcitem varchar(13) = ?lcitem
+   SELECT top 1 SALDO as STOCK_ALMACEN FROM KARDEX  WHERE ITEM = @lcitem AND ALMACEN = 'A'  and fecha between @lfechainicio and @lfechafin ORDER BY FECHA DESC
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lver_stock_almacen,"tstock1") 
+ SELECT tstock1
+ nr1 = RECCOUNT()
+ IF nr1 = 0
+   TEXT TO lver_stock2 noshow
+    declare @lcitem varchar(13) = ?lcitem
+    declare @lfechainicio datetime = convert(datetime, ?lcfechainicio,101) +  CAST('00:00:00' AS DATETIME)
+    SELECT TOP 1 SALDO AS STOCK_ALMACEN FROM KARDEX WHERE ITEM = @lcitem AND ALMACEN = 'A' AND FECHA < @lfechainicio  ORDER BY FECHA DESC
+   ENDTEXT
+   lejecuta=SQLEXEC(gconecta,lver_stock2,"tstock2") 
+   SELECT tstock2
+   nr2 = reccount()
+   IF nr2 = 0
+      litem_stock_almacen = 0
+   ELSE
+      litem_stock_almacen = tstock2.stock_almacen
+   ENDIF
+ ELSE
+   litem_stock_almacen = tstock1.stock_almacen
+ ENDIF
+ * Grabar stock en el archivo pre_ici
+  TEXT TO lactualiza_stock_almacen noshow
+    UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET stock_almacen = ?litem_stock_almacen WHERE item = ?lcitem
+  ENDTEXT
+  lejecuta=SQLEXEC(gconecta,lactualiza_stock_almacen)
+
+
+ * VER EL STOCK DE FARMACIA *
+ TEXT TO lver_stock_farmacia NOSHOW
+   declare @loperacion1 varchar(8) = ?lcoperacioninicial
+   declare @loperacion2 varchar(8) = ?lcoperacionfinal
+   declare @lcitemfar varchar(13) = ?lcitem
+   select top 1 SALDO as STOCK_FARMACIA from KARDEX where ITEM = @lcitemfar and ALMACEN = 'F' and OPERACION between @loperacion1 and @loperacion2 order by operacion desc
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lver_stock_farmacia,"tstockfar") 
+ SELECT tstockfar
+ nf1 = RECCOUNT()
+ IF nf1 = 0
+   TEXT TO lver_sf2 noshow
+      declare @lcitemfar varchar(13) = ?lcitem
+      declare @lfechainicio datetime = convert(datetime, ?lcfechainicio,101) +  CAST('00:00:00' AS DATETIME)
+      select top 1 SALDO as STOCK_FARMACIA  from KARDEX where ITEM = @lcitemfar and ALMACEN = 'F' AND FECHA < @lfechainicio order by operacion desc
+   ENDTEXT
+   lejecuta=SQLEXEC(gconecta,lver_sf2,"tsf2")
+   SELECT tsf2
+   nf2 = RECCOUNT()
+   IF nf2 = 0
+      litem_stock_farmacia = 0
+   ELSE
+      litem_stock_farmacia = tsf2.stock_farmacia
+   ENDIF
+ ELSE
+   litem_stock_farmacia = tstockfar.stock_farmacia
+ ENDIF
+** Actualizar Stock Farmacia
+ TEXT TO lactualiza_stock_farmacia noshow
+     UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET stock_farmacia = ?litem_stock_farmacia WHERE item = ?lcitem
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lactualiza_stock_farmacia)
+ 
+ * Ver Stock Total
+ lstock_total =  litem_stock_almacen + litem_stock_farmacia
+ TEXT TO lactualiza_stock_total noshow
+     UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET stock_total = ?lstock_total WHERE item = ?lcitem
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lactualiza_stock_total)
+
+ **  Buscar Precio
+ TEXT TO lver_precio noshow
+  declare @lcitemprecio varchar(13) = ?lcitem
+  SELECT TOP 1 PRECIOPUB FROM PRECIO where ITEM = @lcitemprecio ORDER BY FECHA DESC
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lver_precio, "tprec")
+ SELECT tprec
+ npre = RECCOUNT()
+ IF npre = 0
+   lprecioitem = 0
+ ELSE
+   lprecioitem = tprec.preciopub
+ ENDIF
+  * Graba Precio en Item
+ TEXT TO lgraba_precio noshow
+     UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET precio = ?lprecioitem WHERE item = ?lcitem
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lgraba_precio)
+
+  * Limpiando Precios 
+ TEXT TO lclear_precio noshow
+     update [SIGSALUD].[dbo].[TMP_PRE_ICI] set precio = 0 where precio is null
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lclear_precio)
+ 
+ * Iniciando el calculo de stock del mes anterior *
+ 
+  
+  cMensage = ' ... REVISANDO STOCK ANTERIOR, PARA  :  ' +lcnombre  
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+  
+ * Almacen
+ TEXT TO lstock_al_anterior noshow
+   declare @lfechastock_anterior datetime = convert(datetime, ?lcfechainicio,101) + CAST('00:00:00' AS DATETIME)
+   declare @lcitemante varchar(13) = ?lcitem
+   SELECT top 1 SALDO as STOCK_ALMACEN FROM KARDEX  WHERE ITEM = @lcitemante AND ALMACEN = 'A'  and fecha < @lfechastock_anterior ORDER BY FECHA DESC
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lstock_al_anterior, "tstocka")
+ SELECT tstocka
+ nra = RECCOUNT()
+ IF nra = 0
+   lstock_a = 0
+ ELSE
+   lstock_a = tstocka.stock_almacen
+ ENDIF
+ * Farmacia
+ 
+ TEXT TO lstock_f noshow
+   declare @loperacion1a varchar(8) = ?lcoperacioninicial
+   declare @lcitemfara varchar(13) = ?lcitem
+   select top 1 SALDO as STOCK_FARMACIA from KARDEX where ITEM = @lcitemfara and ALMACEN = 'F' and OPERACION < @loperacion1a ORDER BY operacion DESC
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lstock_f, "tstockf")  
+ SELECT tstockf
+ nfa = RECCOUNT()
+ IF nfa = 0
+   lstock_fa = 0
+ ELSE
+   lstock_fa = tstockf.stock_farmacia
+ ENDIF
+ lstock_ante_total = lstock_a + lstock_fa
+ 
+ 
+ * Grabar Stock Total Anterior 
+ TEXT TO lactualiza_stock_total_a noshow
+     UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET saldo_mes_anterior  = ?lstock_ante_total WHERE item = ?lcitem
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lactualiza_stock_total_a)
+ 
+ 
+ * REVISAR INGRESO POR ITEM *
+
+ TEXT TO lrevisar_item noshow
+   USE SIGSALUD
+   declare @litem varchar(13) = ?lcitem
+   DECLARE @lfecha1 datetime = convert(datetime, ?lcfechainicio,101)
+   DECLARE @lfecha2 datetime = convert(datetime, ?lcfechafin,101)
+   SELECT SUM(CANTIDAD) AS CANTI FROM INGRESOD WHERE INGRESOID IN (SELECT INGRESOID FROM INGRESOC WHERE FECHA BETWEEN @lfecha1 AND @lfecha2) AND ITEM = @litem  GROUP BY ITEM 
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lrevisar_item, "tingre")
+ SELECT tingre
+ ningre = RECCOUNT()
+ IF ningre = 0
+    lningreso = 0
+ ELSE
+    lningreso = tingre.canti
+ ENDIF
+    
+ * Grabar ingreso por item 
+ TEXT TO lgrabar_ingreso noshow
+     UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET INGRESO_ITEM_ALMACEN  = ?lningreso WHERE item = ?lcitem
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lgrabar_ingreso)
+    
+
+* Grabando Total Salida, saldo final 
+ TEXT TO ltotal_salida noshow
+     UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET TOTAL_SALIDA  = SALDO_MES_ANTERIOR + INGRESO_ITEM_ALMACEN - STOCK_TOTAL
+     UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET SALDO_FINAL  = STOCK_TOTAL
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,ltotal_salida)
+ 
+ TEXT TO lver_fecha_venci NOSHOW
+   USE SIGSALUD
+   declare @litem varchar(13) = ?lcitem
+   SELECT TOP 1 CONVERT(VARCHAR(10), FECHA_VENCIMIENTO, 103) AS FECHA_VENCI  FROM INGRESOD WHERE ITEM = @litem  ORDER BY FECHA_VENCIMIENTO DESC
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lver_fecha_venci, "tvenci")
+ SELECT tvenci
+ lcfecha_vencimiento = ALLTRIM(tvenci.FECHA_VENCI)
+ TEXT TO lgraba_venci noshow
+   UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET FECHA_VENCIMIENTO  = ?lcfecha_vencimiento WHERE item = ?lcitem
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lgraba_venci)
+ 
+ ** VER LOS DATOS DE PARTE DIARIO *
+ TEXT TO lver_diario noshow
+   declare @opeinicio varchar(8) = ?lcoperacioninicial
+   declare @opefin varchar(8) = ?lcoperacionfinal
+   declare @lalmacen varchar(1) = 'F'
+   select k.item,SALDO_ANTIGUO = 0, i.nombre,MAX(k.PRECIO) AS Precio, sum((case when k.Tipo_Transaccion='VC' then k.Cantidad else 0 end)) as Salidas_Contado,
+         sum((case when k.Tipo_Transaccion='VEX' then k.Cantidad else 0 end)) as Salidas_Exonerado, sum((case when k.Tipo_Transaccion='VRP' then k.Cantidad else 0 end)) as Salidas_Credito_Paciente,
+           sum((case when k.Tipo_Transaccion='VRS' then k.Cantidad else 0 end)) as Salidas_SIS, sum((case when k.Tipo_Transaccion='VRI' then k.Cantidad else 0 end)) as Salidas_SISALUD,
+            sum((case when k.Tipo_Transaccion='VRO' then k.Cantidad else 0 end)) as Salidas_SOAT,sum((case when k.Tipo_Transaccion='VRD' then k.Cantidad else 0 end)) as Salidas_ConsPeru,
+              sum((case when k.Tipo_Transaccion='VOI' then k.Cantidad else 0 end)) as Salidas_Sanitaria, sum((case when k.Tipo_Transaccion='VTB' then k.Cantidad else 0 end)) as Salidas_BTB,
+                sum((case when k.Tipo_Transaccion='VOP' then k.Cantidad else 0 end)) as Salidas_Prg,sum((case when k.Tipo_Transaccion='VOD' then k.Cantidad else 0 end)) as Salidas_Dona,
+                   sum((case when k.Tipo_Transaccion='ITR' then k.Cantidad else 0 end)) as Ingreso_Transfiere, sum((case when k.Tipo_Transaccion='IDE' then k.Cantidad else 0 end)) as Ingreso_Devolucion,
+                      sum((case when k.Tipo_Transaccion='IAN' then k.Cantidad else 0 end)) as Ingreso_Anula, (select k1.Saldo from kardex k1 where k1.operacion=(select max(k2.Operacion) from Kardex k2 Where
+                          k2.Operacion Between  @opeinicio and  @opefin and k2.almacen=@lalmacen and k2.Item=k1.item) and k.Item=k1.item) as Saldo,I.Clase,UPPER(C.Nombre) as Nombre_Clase, 
+                          sum((case when k.Tipo_Transaccion='VOC' then k.Cantidad else 0 end)) as CANJE, i.interfase2 as sismed  from v_kardex k left outer join tipo_transaccion t on t.tipo_transaccion=k.Tipo_Transaccion   left outer join item i on i.item=k.Item left outer join clase c on c.clase=i.clase 
+                                     where k.item = ?lcitem and k.Operacion between @opeinicio and @opefin and k.almacen=@lalmacen  group by k.item,i.nombre,i.clase,i.interfase2, c.nombre order by Clase, NOMBRE asc
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lver_diario, "tdiario")
+ SELECT tdiario
+ lnsc = tdiario.Salidas_Contado
+ lncp = tdiario.salidas_credito_paciente
+ lnsis = tdiario.salidas_sis
+ lndosis_unitaria = tdiario.salidas_consperu
+ lnintervencion_sanitaria = tdiario.salidas_sanitaria + tdiario.salidas_BTB + tdiario.Salidas_Prg
+ lnsoat = tdiario.salidas_soat
+ lnexonerado = tdiario.salidas_exonerado
+ ling_devo = tdiario.Ingreso_Devolucion
+ 
+ 
+ TEXT TO lver_tansferencia noshow
+   DECLARE @lfecha1 datetime = convert(datetime, ?lcfechainicio,101)  +  CAST('00:00:00' AS DATETIME)
+   DECLARE @lfecha2 datetime = convert(datetime, ?lcfechafin,101) + CAST('23:59:59' AS DATETIME)
+   Declare @litem varchar(6) = ?lcitem
+   select SUM(CANTIDAD) AS TRANSFERENCIA from KARDEX
+     where ITEM = @litem AND tipo_transaccion in ('STE', 'SPR', 'SCJ', 'SPD', 'SRO', 'STI', 'STN', 'SVN') AND ALMACEN = 'A' AND FECHA  BETWEEN @lfecha1 AND @lfecha2 GROUP BY ITEM 
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lver_tansferencia, "ttra")
+ SELECT  ttra
+ lncanti_trans = ttra.TRANSFERENCIA
+ 
+ TEXT TO lgrabar_pdiario noshow
+   UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET  VENTAS_CONTADO = ?lnsc, CREDITO_PACIENTE = ?lncp, SIS = ?lnsis, DOSIS_UNITARIA = ?lndosis_unitaria, TOTAL_SIS = ?lnsis + ?lndosis_unitaria, INTERVENCION_SANITARIA = ?lnintervencion_sanitaria,
+      SOAT = ?lnsoat, EXONERADO = ?lnexonerado, TRANSFERENCIA_DEVOLUCIONES = ?lncanti_trans   where ITEM = ?lcitem
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lgrabar_pdiario)
+
+ TEXT TO limporte noshow
+    update [SIGSALUD].[dbo].[TMP_PRE_ICI] set IMPORTE_VENTAS = VENTAS_CONTADO * PRECIO, DFECHA_FIN_PROCESO = GETDATE() 
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,limporte)
+ 
+ 
+ 
+ TEXT TO lanula_sis noshow
+  declare @opeinicio varchar(8) = ?lcoperacioninicial
+  declare @opefin varchar(8) = ?lcoperacionfinal
+  declare @lcitem varchar(13) = ?lcitem
+  select SUM(CANTIDAD) as ANULA_SIS from v_KARDEX a left join USUARIO b on b.USUARIO = a.USUARIO where OPERACION between @opeinicio and @opefin and ITEM = @lcitem  and ALMACEN = 'F' and TIPO_TRANSACCION = 'IAN'  
+  AND B.MODULO = 'FARMACIA'  group by ITEM 
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lanula_sis, "tsis") 
+ SELECT tsis
+ ldevo_sis = tsis.anula_sis
+ ltotal_restar_sis =  ling_devo +  ldevo_sis
+ 
+ text to lresta noshow
+   UPDATE [SIGSALUD].[dbo].[TMP_PRE_ICI] SET total_sis = total_sis - ?ltotal_restar_sis WHERE item = ?lcitem
+ ENDTEXT
+ lejecuta=SQLEXEC(gconecta,lresta)
+ 
+ 
+ cMensage = ' REVISANDO PARA ITEM : ' +lcnombre   + '... EL QUE NO TENGA PACIENCIA, NO LO EXIGA DE LOS DEMAS...' 
+  _Screen.Scalemode = 0
+  Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+
+ENDSCAN
+
+cMensage = ' ... LIMPIANDO STOCKS CON SALDO CERO ...' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+
+TEXT TO leliminar NOSHOW  
+  DELETE FROM [SIGSALUD].[dbo].[TMP_PRE_ICI] WHERE STOCK_TOTAL = 0 AND SALDO_MES_ANTERIOR = 0
+ENDTEXT
+lejecuta=SQLEXEC(gconecta,leliminar)
+
+
+cMensage = ' ... PROCESO CULMINADO...' 
+_Screen.Scalemode = 0
+Wait Window cMensage At Int(_Screen.Height/2), Int(_Screen.Width/2 - Len(cMensage)/2) nowait
+
+

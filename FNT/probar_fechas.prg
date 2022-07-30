@@ -1,0 +1,9 @@
+CLEAR
+
+* lcodigopersonal
+lnmes = 2
+lnanio = 2018
+ldfecha_seleccion = CTOD('01' + '/' + PADL(ALLTRIM(STR(lnmes)), 2,'0') + '/' + ALLTRIM(STR(lnanio)))
+ld_fecha_aumentado = GOMONTH(ldfecha_seleccion,1)
+lncantidad_dias_mes = DAY(ld_fecha_aumentado - DAY(ld_fecha_aumentado))
+?lncantidad_dias_mes

@@ -1,0 +1,207 @@
+***************************************************************
+*** Me le compartio hace años algun genio de fox.  
+*** Un agradecimiento infinito , me ha sido de mucha utilidad
+*** Como no se quien es ... Agradecimiento a todos los foxeros.
+*** Atte: Rodrigo Bedoya z. Bogota Colombia
+***************************************************************
+   ** cursor de fox *** 
+   SELECT BOLETAS      
+    =exp2excel("BOLETAS","","BOLETAS DE INVENTARIOS")
+
+    **** =exp2excel("BOLETAS","archivo destino si se quiere o en blanco es mas practico ","BOLETA DE INVENTARIOS")
+
+
+
+
+********************************************************************
+********************************************************************
+*!* FUNCTION Exp2Excel( [cCursor, [cFileSave, [cTitulo]]] )
+*!*
+*!* Exporta un Cursor de Visual FoxPro a Excel, utilizando la
+*!* técnica de importación de datos externos en modo texto.
+*!*
+*!* PARAMETROS OPCIONALES:
+*!* - cCursor  Alias del cursor que se va a exportar.
+*!*            Si no se informa, utiliza el alias
+*!*            en que se encuentra.
+*!*
+*!* - cFileName  Nombre del archivo que se va a grabar.
+*!*              Si no se informa, muestra el libro generado
+*!*              una vez concluída la exportación.
+*!*
+*!* - cTitulo  Titulo del informe. Si se informa, este
+*!*            ocuparía la primera file de cada hoja del libro.
+********************************************************************
+********************************************************************
+FUNCTION Exp2Excel( cCursor, cFileSave, cTitulo )
+  LOCAL cWarning
+  cWarning = "Exportar a EXCEL"
+  IF EMPTY(cCursor)
+    cCursor = ALIAS()
+  ENDIF
+  IF TYPE('cCursor') # 'C' OR !USED(cCursor)
+    MESSAGEBOX("Parámetros Inválidos",16,cWarning)
+    RETURN .F.
+  ENDIF
+  *********************************
+  *** Creación del Objeto Excel ***
+  *********************************
+  WAIT WINDOW 'Abriendo aplicación Excel.' NOWAIT NOCLEAR
+  
+  
+  &&&oExcel = CREATEOBJECT("Excel.Application")
+  oExcel = GetObject("","Excel.Application")
+  
+  WAIT CLEAR
+
+  IF TYPE('oExcel') # 'O'
+    MESSAGEBOX("No se puede procesar el archivo porque no tiene la aplicación" ;
+      + CHR(13) + "Microsoft Excel instalada en su computador.",16,cWarning)
+    RETURN .F.
+  ENDIF
+
+  oExcel.workbooks.ADD
+
+  LOCAL lnRecno, lnPos, lnPag, lnCuantos, lnRowTit, lnRowPos, i, lnHojas, cDefault
+
+  cDefault = ADDBS(SYS(5)  + SYS(2003))
+
+  SELECT (cCursor)
+  lnRecno = RECNO(cCursor)
+  GO TOP
+
+  *************************************************
+  *** Verifica la cantidad de hojas necesarias  ***
+  *** en el libro para la cantidad de datos     ***
+  *************************************************
+  lnHojas = ROUND(RECCOUNT(cCursor)/65000,0)
+  DO WHILE oExcel.Sheets.COUNT < lnHojas
+    oExcel.Sheets.ADD
+  ENDDO
+
+  lnPos = 0
+  lnPag = 0
+
+  DO WHILE lnPos < RECCOUNT(cCursor)
+
+    lnPag = lnPag + 1 && Hoja que se está procesando
+
+    WAIT WINDOWS 'Exportando cursor '  + UPPER(cCursor)  + ' a Microsoft Excel...' ;
+      + CHR(13) + '(Hoja '  + ALLTRIM(STR(lnPag))  + ' de '  + ALLTRIM(STR(lnHojas)) ;
+      + ')' NOCLEAR NOWAIT
+
+    IF FILE(cDefault  + cCursor  + ".txt")
+      DELETE FILE (cDefault  + cCursor  + ".txt")
+    ENDIF
+
+    COPY  NEXT 65000 TO (cDefault  + cCursor  + ".txt") DELIMITED WITH CHARACTER ";"
+    lnPos = RECNO(cCursor)
+
+    oExcel.Sheets(lnPag).SELECT
+
+    XLSheet = oExcel.ActiveSheet
+    XLSheet.NAME = cCursor + '_' + ALLTRIM(STR(lnPag))
+
+    lnCuantos = AFIELDS(aCampos,cCursor)
+
+    ********************************************************
+    *** Coloca título del informe (si este es informado) ***
+    ********************************************************
+    IF !EMPTY(cTitulo)
+      XLSheet.Cells(1,1).FONT.NAME = "Arial"
+      XLSheet.Cells(1,1).FONT.SIZE = 8
+      XLSheet.Cells(1,1).FONT.BOLD = .T.
+      XLSheet.Cells(1,1).VALUE = cTitulo
+      XLSheet.RANGE(XLSheet.Cells(1,1),XLSheet.Cells(1,lnCuantos)).MergeCells = .T.
+      XLSheet.RANGE(XLSheet.Cells(1,1),XLSheet.Cells(1,lnCuantos)).Merge
+      XLSheet.RANGE(XLSheet.Cells(1,1),XLSheet.Cells(1,lnCuantos)).HorizontalAlignment = 3
+      lnRowPos = 3
+    ELSE
+      lnRowPos = 2
+    ENDIF
+
+    lnRowTit = lnRowPos - 1
+    **********************************
+    *** Coloca títulos de Columnas ***
+    **********************************
+    FOR i = 1 TO lnCuantos
+      lcName  = aCampos(i,1)
+      lcCampo = ALLTRIM(cCursor) + '.' + aCampos(i,1)
+      XLSheet.Cells(lnRowTit,i).VALUE=lcname
+      XLSheet.Cells(lnRowTit,i).FONT.SIZE = 8
+      XLSheet.Cells(lnRowTit,i).FONT.bold = .T.
+      XLSheet.Cells(lnRowTit,i).Interior.ColorIndex = 15
+      XLSheet.Cells(lnRowTit,i).Interior.PATTERN = 1
+      XLSheet.RANGE(XLSheet.Cells(lnRowTit,i),XLSheet.Cells(lnRowTit,i)).BorderAround(7)
+    NEXT
+
+    XLSheet.RANGE(XLSheet.Cells(lnRowTit,1),XLSheet.Cells(lnRowTit,lnCuantos)).HorizontalAlignment = 3
+
+    *************************
+    *** Cuerpo de la hoja ***
+    *************************
+    oConnection = XLSheet.QueryTables.ADD("TEXT;"  + cDefault  + cCursor  + ".txt", ;
+      XLSheet.RANGE("A"  + ALLTRIM(STR(lnRowPos))))
+
+    WITH oConnection
+      .NAME = cCursor
+      .FieldNames = .T.
+      .RowNumbers = .F.
+      .FillAdjacentFormulas = .F.
+      .PreserveFormatting = .T.
+      .RefreshOnFileOpen = .F.
+      .RefreshStyle = 1 && xlInsertDeleteCells
+      .SavePassword = .F.
+      .SaveData = .T.
+      .AdjustColumnWidth = .T.
+      .RefreshPeriod = 0
+      .TextFilePromptOnRefresh = .F.
+      .TextFilePlatform = 850
+      .TextFileStartRow = 1
+      .TextFileParseType = 1 && xlDelimited
+      .TextFileTextQualifier = 1 && xlTextQualifierDoubleQuote
+      .TextFileConsecutiveDelimiter = .F.
+      .TextFileTabDelimiter = .F.
+      .TextFileSemicolonDelimiter = .T.
+      .TextFileCommaDelimiter = .F.
+      .TextFileSpaceDelimiter = .F.
+      .TextFileTrailingMinusNumbers = .T.
+      .REFRESH
+    ENDWITH
+
+    XLSheet.RANGE(XLSheet.Cells(lnRowTit,1),XLSheet.Cells(XLSheet.ROWS.COUNT,lnCuantos)).FONT.NAME = "Arial"
+    XLSheet.RANGE(XLSheet.Cells(lnRowTit,1),XLSheet.Cells(XLSheet.ROWS.COUNT,lnCuantos)).FONT.SIZE = 8
+
+    XLSheet.COLUMNS.AUTOFIT
+    XLSheet.Cells(lnRowPos,1).SELECT
+    oExcel.ActiveWindow.FreezePanes = .T.
+
+    WAIT CLEAR
+
+  ENDDO
+
+  oExcel.Sheets(1).SELECT
+  oExcel.Cells(lnRowPos,1).SELECT
+
+  IF !EMPTY(cFileSave)
+    oExcel.DisplayAlerts = .F.
+    oExcel.ActiveWorkbook.SAVEAS(cFileSave)
+    oExcel.QUIT
+  ELSE
+    oExcel.VISIBLE = .T.
+  ENDIF
+
+  GO lnRecno
+
+  RELEASE oExcel,XLSheet,oConnection
+
+  IF FILE(cDefault + cCursor + ".txt")
+    DELETE FILE (cDefault + cCursor + ".txt")
+  ENDIF
+
+  RETURN .T.
+
+ENDFUNC
+
+
+

@@ -1,0 +1,6 @@
+lo = NEWOBJECT("_CommonFolder",HOME(1)+"FFC\_System")
+lcMD = lo.GetFolder(5)
+lcAP = lo.GetFolder(38)
+lo = .Null.
+MESSAGEBOX(lcMD,64,"Mis Documentos")
+MESSAGEBOX(lcAP,64,"Archivos de programa")
