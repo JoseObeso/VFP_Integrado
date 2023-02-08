@@ -1,0 +1,19 @@
+CLEAR
+ndia = dow(DATE(2022,8,15))
+
+?nombredeldia(ndia)
+
+
+Function NombredelDia(IntDia)
+
+LOCAL arraydia(7)
+ arraydia[1] = 'Domingo'
+ arraydia[2] = 'Lunes'
+ arraydia[3] = 'Martes'
+ arraydia[4] = 'Miercoles'
+ arraydia[5] = 'Jueves'
+ arraydia[6] = 'Viernes'
+ arraydia[7] = 'Sabado'
+ return (arraydia(IntDia))
+endfunc
+
